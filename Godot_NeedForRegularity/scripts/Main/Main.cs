@@ -10,22 +10,30 @@ namespace Main
         private GAMESTATE _gamestate = GAMESTATE.IDLE;
         private OBJECTTYPE _objectType = OBJECTTYPE.SQUARE;
         private BaseObject _selectedObject;
-        private uint _objectsNumber = 1000;
-
+        private uint _objectsNumber = 10;
         private Node _objectsContainer;
 
         public override void _Ready()
         {
-            GD.Randomize();
-            Globals.ScreenInfo.size = GetViewport().Size;
-            Globals.ScreenInfo.screenRect = GetViewport().GetVisibleRect();
-            _objectsContainer = GetNode<Node>("ObjectsContainer");
+            Globals.ScreenInfo.UpdateScreenInfo(GetViewport());
 
+            PackedScene levelBarrierScene = (PackedScene)ResourceLoader.Load("res://scenes/LevelBarrier.tscn"); 
+            BackgroundAndLevel.LevelBarrier levelBarrier = levelBarrierScene.Instance<BackgroundAndLevel.LevelBarrier>();
+            AddChild(levelBarrier);
+            
+            GD.Randomize();
+            _objectsContainer = GetNode<Node>("ObjectsContainer");
             SpawnObjects();
         }
         public override void _PhysicsProcess(float delta)
         {
             UpdateState();
+
+
+            Label label = GetNode<Label>("Label");
+            label.Text = "VisibleRect Size:" + GetViewport().GetVisibleRect().Size.ToString();
+            label.Text += "\n Viewport Size:" + GetViewport().Size.ToString();
+            label.Text += "\n Viewport OverrideSize:" + GetViewport().GetSizeOverride().ToString();
 
             switch (_gamestate)
             {
@@ -40,16 +48,13 @@ namespace Main
 
         public override void _UnhandledInput(InputEvent @event)
         {
-           if (_selectedObject != null)
-           {
-               _selectedObject.HandleOutsideInput(@event);
-           }
+            if (_selectedObject != null)
+            {
+                _selectedObject.HandleOthersInput(@event);
+            }
 
-           @event.Dispose();
+            @event.Dispose();
         }
-
-        
-
 
         private void SpawnObjects()
         {
@@ -69,8 +74,8 @@ namespace Main
 
             for (int _ = 0; _ < _objectsNumber; _++)
             {
-                uint positionX = GD.Randi() % (uint)Globals.ScreenInfo.size[0];
-                uint positionY = GD.Randi() % (uint)Globals.ScreenInfo.size[1];
+                uint positionX = GD.Randi() % (uint)Globals.ScreenInfo.Size[0];
+                uint positionY = GD.Randi() % (uint)Globals.ScreenInfo.Size[1];
 
                 BaseObject spawnedObject = objectScene.Instance<BaseObject>();
                 spawnedObject.Init(new Vector2(positionX, positionY));
@@ -97,7 +102,7 @@ namespace Main
         public void _on_GameObjects_UpdateSelection(BaseObject sender, bool eliminateOldSelection, bool unSelectAll)
         {
             if (eliminateOldSelection)
-            {   
+            {
                 if (unSelectAll)
                 {
                     _selectedObject = null;

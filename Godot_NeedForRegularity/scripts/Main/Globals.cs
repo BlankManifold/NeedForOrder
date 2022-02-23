@@ -18,8 +18,17 @@ namespace Globals
     
     public struct ScreenInfo
     {
-        public static Vector2 size;
-        public static Rect2 screenRect;
+        public static Vector2 Size;
+        public static Vector2 VisibleRectSize;
+        public static Vector2 DisplaySize;
+        public static Vector2 ScaleFactor;
+        public static void UpdateScreenInfo(Viewport viewport)
+        {
+            Globals.ScreenInfo.Size = viewport.Size;
+            Globals.ScreenInfo.VisibleRectSize = viewport.GetVisibleRect().Size;
+            Globals.ScreenInfo.DisplaySize = new Vector2((int)ProjectSettings.GetSetting("display/window/size/width"), (int)ProjectSettings.GetSetting("display/window/size/height"));
+            Globals.ScreenInfo.ScaleFactor = Globals.ScreenInfo.DisplaySize / Globals.ScreenInfo.VisibleRectSize;
+        }
     };
 }
 
