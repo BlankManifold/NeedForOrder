@@ -7,6 +7,7 @@ android/
 
 # Mono-specific ignores
 .mono/
+mono_*
 data_*/
 
 # Ignore VSCODE stuff
