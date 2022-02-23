@@ -130,16 +130,11 @@ namespace GameObjects
         {
             Physics2DDirectSpaceState spaceState = GetWorld2d().DirectSpaceState;
             Godot.Collections.Array objectsClicked = spaceState.IntersectPoint(inputPosition, 32, null, 2147483647, true, false);
-            int objectsNumber = objectsClicked.Count;
-            int currentIndex = GetIndex();
 
-            if (currentIndex >=  objectsNumber)
+            if (objectsClicked.Count > 1)
             {
-                return true;
-            }
-
-            if (objectsNumber > 1)
-            {
+                int currentIndex = GetIndex();
+                // int maxIndex = 0;
                 foreach (Godot.Collections.Dictionary objectClicked in objectsClicked)
                 {
                     Node node = ((Node)objectClicked["collider"]);
@@ -147,8 +142,10 @@ namespace GameObjects
                     if (index > currentIndex)
                     {
                         return false;
+                        //maxIndex = index;
                     }
                 }
+                // return (currentIndex == maxIndex);
             }
             return true;
 
@@ -160,6 +157,7 @@ namespace GameObjects
 
             BaseObject topNode = null;
             int objectsNumber = objectsClicked.Count;
+
       
             if (objectsNumber > 0)
             {
@@ -174,10 +172,6 @@ namespace GameObjects
                         {
                             topNode = node;
                             maxIndex = index;
-                            if (maxIndex >= objectsNumber)
-                            {
-                                return topNode;
-                            }
                         }
                     }
                 }
@@ -209,7 +203,7 @@ namespace GameObjects
                     _state = Globals.OBJECTSTATE.SELECTED;
                     s_someonePressed = false;
 
-                    BaseObject topNodeInExitedPoint = ReturnTopOne(GetViewport().GetMousePosition());
+                    BaseObject topNodeInExitedPoint = ReturnTopOne(mouseButtonEvent.Position);
                     if (topNodeInExitedPoint != this && topNodeInExitedPoint != null)
                     {
                         _imOnThisArea = false;
@@ -295,9 +289,9 @@ namespace GameObjects
                 if (topNodeInExitedPoint == null)
                 {
                     _imOnThisArea = false;
-                    //s_imOnArea = false;
+                    s_imOnArea = false;
                     s_hoveredObject = null;
-                    //s_someoneHovered = false;
+                    s_someoneHovered = false;
                 }
                 else
                 {
@@ -315,9 +309,9 @@ namespace GameObjects
                 if (s_hoveredObject == null)
                 {
                     _imOnThisArea = true;
-                    //s_imOnArea = true;
+                    s_imOnArea = true;
                     s_hoveredObject = this;
-                    //s_someoneHovered = true;
+                    s_someoneHovered = true;
 
                     return;
                 }
@@ -326,9 +320,10 @@ namespace GameObjects
                 {
                     s_hoveredObject.ImOnThisArea = false;
                     _imOnThisArea = true;
-                    //s_imOnArea = true;
+                    s_imOnArea = true;
                     s_hoveredObject = this;
-                    //s_someoneHovered = true;
+                    s_hoveredObject.ImOnThisArea = true;
+                    s_someoneHovered = true;
                 }
             }
 
