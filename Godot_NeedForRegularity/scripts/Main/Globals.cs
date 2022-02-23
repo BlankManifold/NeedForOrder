@@ -29,6 +29,11 @@ namespace Globals
             Globals.ScreenInfo.DisplaySize = new Vector2((int)ProjectSettings.GetSetting("display/window/size/width"), (int)ProjectSettings.GetSetting("display/window/size/height"));
             Globals.ScreenInfo.ScaleFactor = Globals.ScreenInfo.DisplaySize / Globals.ScreenInfo.VisibleRectSize;
         }
-    };
+    }
+
+    public struct RandomManager
+    {
+        public static RandomNumberGenerator rng = new RandomNumberGenerator();
+    }
 }
 

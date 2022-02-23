@@ -26,6 +26,18 @@ namespace GameObjects
         private ColorRect _colorRect;
 
 
+        public override void InitRandomObject()
+        {   
+            int offset = _lenght/2; 
+            int positionX =  Globals.RandomManager.rng.RandiRange(offset, (int)Globals.ScreenInfo.Size[0] - offset);
+            int positionY =  Globals.RandomManager.rng.RandiRange(offset, (int)Globals.ScreenInfo.Size[1] - offset);
+
+            float angleDegrees = Globals.RandomManager.rng.RandfRange(0,90);
+
+            GlobalPosition = new Vector2(positionX,positionY);
+            GlobalRotationDegrees = angleDegrees;
+
+        }
         public override void _Ready()
         {
             base._Ready();

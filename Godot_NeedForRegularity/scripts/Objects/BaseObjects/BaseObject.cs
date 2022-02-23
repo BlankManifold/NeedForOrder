@@ -11,23 +11,49 @@ namespace GameObjects
         protected bool _overlappaple = true;
 
         private Vector2 _clickedRelativePosition;
+        public Vector2 ClickedRelativePosition
+        {
+            get { return _clickedRelativePosition; }
+            set { _clickedRelativePosition = value; }
+        }
 
         public static bool s_someoneSelected { get; set; } = false;
+        public static bool s_someonePressed { get; set; } = false;
+        public static bool s_someoneHovered { get; set; } = false;
+        public static bool s_imOnArea { get; set; } = false;
+
+        public static BaseObject s_selectedObject = null;
+        public static BaseObject s_hoveredObject = null;
+        protected bool _imOnThisArea = false;
+        public bool ImOnThisArea
+        {
+            get { return ImOnThisArea; }
+            set { _imOnThisArea = value; }
+        }
+
         public Vector2 targetPosition { get; set; }
         protected Globals.OBJECTSTATE _state;
         public Globals.OBJECTSTATE State
         {
             get { return _state; }
+            set { _state = value; }
         }
 
         private Node2D _main;
 
         [Signal]
-        public delegate void UpdateSelection(BaseObject sender, bool eliminateOldSelection, bool unSelectAll);
+        public delegate void UpdateSelection(bool eliminateOldSelection);
 
-        public void Init(Vector2 position)
+        public virtual void Init(Vector2 position)
         {
             GlobalPosition = position;
+        }
+        public virtual void InitRandomObject()
+        {
+            uint positionX = GD.Randi() % (uint)Globals.ScreenInfo.Size[0];
+            uint positionY = GD.Randi() % (uint)Globals.ScreenInfo.Size[1];
+
+            GlobalPosition = new Vector2(positionX, positionY);
         }
 
         public override void _Process(float delta)
@@ -36,6 +62,11 @@ namespace GameObjects
                 Modulate = new Color(0, 0, 0);
             else
                 Modulate = new Color(1, 1, 1);
+
+            if (s_hoveredObject == this)
+                Modulate = new Color(1, 0, 0);
+
+
 
         }
         public override void _Ready()
@@ -48,26 +79,38 @@ namespace GameObjects
             {
                 CollisionMask = 2;
             }
+            else
+            {
+                CollisionMask = 3;
+            }
 
             _main = (Node2D)GetTree().GetNodesInGroup("main")[0];
             Connect(nameof(UpdateSelection), _main, "_on_GameObjects_UpdateSelection");
-
-            Connect("input_event", this, nameof(_on_SelectionAreaShape_input_event));
         }
 
+        public virtual void InputControlFlow(InputEvent @event)
+        {
+            if (_imOnThisArea)
+            {
+                HandleSelectionInput(@event);
+                HandleMotionInput(@event);
+            }
+            else
+            {
+                HandleUnselectionInput(@event);
+                HandleMotionInput(@event);
+            }
+        }
 
-
-        public void Select(bool unSelectAll = false)
+        public void Select()
         {
             bool eliminateOldSelection = false;
 
             if (s_someoneSelected)
                 eliminateOldSelection = true;
 
-            if (unSelectAll)
-                s_someoneSelected = false;
 
-            EmitSignal(nameof(UpdateSelection), this, eliminateOldSelection, unSelectAll);
+            EmitSignal(nameof(UpdateSelection), eliminateOldSelection);
         }
         public virtual void Move(float _)
         {
@@ -87,111 +130,208 @@ namespace GameObjects
         {
             Physics2DDirectSpaceState spaceState = GetWorld2d().DirectSpaceState;
             Godot.Collections.Array objectsClicked = spaceState.IntersectPoint(inputPosition, 32, null, 2147483647, true, false);
+            int objectsNumber = objectsClicked.Count;
+            int currentIndex = GetIndex();
 
-            if (objectsClicked.Count > 1)
+            if (currentIndex >=  objectsNumber)
             {
-                int currentIndex = GetIndex();
-                int maxIndex = 0;
+                return true;
+            }
+
+            if (objectsNumber > 1)
+            {
                 foreach (Godot.Collections.Dictionary objectClicked in objectsClicked)
                 {
                     Node node = ((Node)objectClicked["collider"]);
                     int index = node.GetIndex();
-                    if (index > maxIndex)
+                    if (index > currentIndex)
                     {
-                        maxIndex = index;
+                        return false;
                     }
                 }
-                return (currentIndex == maxIndex);
             }
             return true;
 
         }
-
-
-        public virtual void HandleOthersInput(InputEvent @event)
+        public BaseObject ReturnTopOne(Vector2 inputPosition)
         {
+            Physics2DDirectSpaceState spaceState = GetWorld2d().DirectSpaceState;
+            Godot.Collections.Array objectsClicked = spaceState.IntersectPoint(inputPosition, 32, null, 2147483647, true, false);
 
-            // HANDLE STATE WHEN IS ALREADY MOVING OR JUST START TO MOVE -> START MOVING
-            if (_state == Globals.OBJECTSTATE.PRESSED || _state == Globals.OBJECTSTATE.MOVING)
+            BaseObject topNode = null;
+            int objectsNumber = objectsClicked.Count;
+      
+            if (objectsNumber > 0)
             {
-                // HANDLE MOVE THE OBJECT
-                if (@event is InputEventMouseMotion mouseMotion)
+                int currentIndex = GetIndex();
+                int maxIndex = -1;
+                foreach (Godot.Collections.Dictionary objectClicked in objectsClicked)
                 {
-                    if (_state == Globals.OBJECTSTATE.PRESSED)
+                    if (objectClicked["collider"] is BaseObject node)
                     {
-                        _state = Globals.OBJECTSTATE.MOVING;
+                        int index = node.GetIndex();
+                        if (index > maxIndex)
+                        {
+                            topNode = node;
+                            maxIndex = index;
+                            if (maxIndex >= objectsNumber)
+                            {
+                                return topNode;
+                            }
+                        }
                     }
+                }
+            }
+            
+            return topNode;
+        }
 
-                    setupFollowMouse(mouseMotion);
+        public virtual void HandleMotionInput(InputEvent @event)
+        {
+            if (@event is InputEventMouseMotion mouseMotion && IsInstanceValid(@event) && _state != Globals.OBJECTSTATE.SELECTED)
+            {
+                if (_state == Globals.OBJECTSTATE.PRESSED)
+                {
+                    _state = Globals.OBJECTSTATE.MOVING;
+                }
 
-                    @event.Dispose();
+                setupFollowMouse(mouseMotion);
+
+                @event.Dispose();
+                return;
+            }
+
+
+            if (@event is InputEventMouseButton mouseButtonEvent && IsInstanceValid(@event))
+            {
+                if (mouseButtonEvent.IsActionReleased("select"))
+                {
+                    _state = Globals.OBJECTSTATE.SELECTED;
+                    s_someonePressed = false;
+
+                    BaseObject topNodeInExitedPoint = ReturnTopOne(GetViewport().GetMousePosition());
+                    if (topNodeInExitedPoint != this && topNodeInExitedPoint != null)
+                    {
+                        _imOnThisArea = false;
+                        s_hoveredObject = topNodeInExitedPoint;
+                        s_hoveredObject.ImOnThisArea = true;
+                    }
+                   
+                    mouseButtonEvent.Dispose();
                     return;
                 }
 
-                // HANDLE UNPRESSED/RELEASE THE OBJECT -> STOP MOVING
-                if (@event is InputEventMouseButton)
+                if (mouseButtonEvent.IsActionPressed("select"))
                 {
-                    if (@event.IsActionReleased("select"))
-                    {
-                        _state = Globals.OBJECTSTATE.SELECTED;
-                    }
+                    _state = Globals.OBJECTSTATE.PRESSED;
+                    s_someonePressed = true;
 
-                    @event.Dispose();
+                    _clickedRelativePosition = mouseButtonEvent.Position - GlobalPosition;
+                    mouseButtonEvent.Dispose();
                     return;
                 }
             }
 
+        }
+
+        public virtual void HandleUnselectionInput(InputEvent @event)
+        {
             // HANDLE UNSELECT THE OBJECT IF U CLICK OUTSIDE OF IT -> UNSELECTED
-            if (_state == Globals.OBJECTSTATE.SELECTED)
+            if (@event is InputEventMouseButton mouseButtonEvent && IsInstanceValid(@event))
             {
-                if (@event is InputEventMouseButton)
+                if (mouseButtonEvent.IsActionPressed("select"))
                 {
-                    if (@event.IsActionPressed("select"))
+                    _state = Globals.OBJECTSTATE.UNSELECETED;
+
+                    if (s_someoneHovered)
                     {
-                        _state = Globals.OBJECTSTATE.UNSELECETED;
-
-                        targetPosition = GlobalPosition;
-                        Select(true);
-                        s_someoneSelected = false;
+                        s_selectedObject = s_hoveredObject;
+                        s_selectedObject.State = Globals.OBJECTSTATE.PRESSED;
+                        s_selectedObject.ClickedRelativePosition = mouseButtonEvent.Position - s_selectedObject.GlobalPosition;
+                        Select();
+                        s_someoneSelected = true;
+                        s_someonePressed = true;
                     }
-
-                    @event.Dispose();
+                    else
+                    {
+                        s_selectedObject = null;
+                        Select();
+                        s_someoneSelected = false;
+                        s_someonePressed = false;
+                    }
+                    mouseButtonEvent.Dispose();
                     return;
                 }
             }
-
-            @event.Dispose();
         }
         public virtual void HandleSelectionInput(InputEvent @event)
         {
-            //HANDLE THE SELECTION/UNSELECTION OF A OBJECT WHEN CLICK ON IT -> DO STUFF ONLY IF IS RENDERED ON TOP LAYER
-            if (@event is InputEventMouseButton mouseButtonEvent && checkIfOnTop(mouseButtonEvent.Position))
+            if (@event is InputEventMouseButton mouseButtonEvent && checkIfOnTop(mouseButtonEvent.Position) && IsInstanceValid(@event))
             {
 
-                // HANDLE SELECTION OF THE OBJECT IF ON TOP AND U CLICK ON -> SELECT THE OBJECT/CHANGE THE SELECTION 
                 if (mouseButtonEvent.IsActionPressed("select"))
                 {
                     _state = Globals.OBJECTSTATE.PRESSED;
 
                     _clickedRelativePosition = mouseButtonEvent.Position - GlobalPosition;
 
-                    Select(false);
+                    s_selectedObject = this;
+                    Select();
                     s_someoneSelected = true;
+                    s_someonePressed = true;
+
+                    mouseButtonEvent.Dispose();
+                    return;
                 }
-
-                GetTree().SetInputAsHandled();
-                mouseButtonEvent.Dispose();
-                return;
-
             }
-
-            @event.Dispose();
         }
 
-
-        public void _on_SelectionAreaShape_input_event(Node _, InputEvent @event, int __)
+        public void _on_BaseObject_mouse_exited()
         {
-            HandleSelectionInput(@event);
+            if (!s_someonePressed || _state == Globals.OBJECTSTATE.PRESSED)
+            {
+                BaseObject topNodeInExitedPoint = ReturnTopOne(GetViewport().GetMousePosition());
+                
+                if (topNodeInExitedPoint == null)
+                {
+                    _imOnThisArea = false;
+                    //s_imOnArea = false;
+                    s_hoveredObject = null;
+                    //s_someoneHovered = false;
+                }
+                else
+                {
+                    _imOnThisArea = false;
+                    s_hoveredObject = topNodeInExitedPoint;
+                    s_hoveredObject.ImOnThisArea = true;
+                }
+            }
+        }
+        public void _on_BaseObject_mouse_entered()
+        {
+
+            if (!s_someonePressed || _state == Globals.OBJECTSTATE.PRESSED)
+            {
+                if (s_hoveredObject == null)
+                {
+                    _imOnThisArea = true;
+                    //s_imOnArea = true;
+                    s_hoveredObject = this;
+                    //s_someoneHovered = true;
+
+                    return;
+                }
+
+                if (checkIfOnTop(GetViewport().GetMousePosition()))
+                {
+                    s_hoveredObject.ImOnThisArea = false;
+                    _imOnThisArea = true;
+                    //s_imOnArea = true;
+                    s_hoveredObject = this;
+                    //s_someoneHovered = true;
+                }
+            }
+
         }
 
 

@@ -4,7 +4,7 @@ namespace GameObjects
 {
     public interface ISelectable
     {
-        void Select(bool unSelectAll = false);
+        void Select();
         void HandleSelectionInput(InputEvent @event);
         
     }

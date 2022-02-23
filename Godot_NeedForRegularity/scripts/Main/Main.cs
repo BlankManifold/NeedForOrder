@@ -10,8 +10,10 @@ namespace Main
         private GAMESTATE _gamestate = GAMESTATE.IDLE;
         private OBJECTTYPE _objectType = OBJECTTYPE.SQUARE;
         private BaseObject _selectedObject;
-        private uint _objectsNumber = 10;
+        private uint _objectsNumber = 20;
         private Node _objectsContainer;
+
+
 
         public override void _Ready()
         {
@@ -21,7 +23,7 @@ namespace Main
             BackgroundAndLevel.LevelBarrier levelBarrier = levelBarrierScene.Instance<BackgroundAndLevel.LevelBarrier>();
             AddChild(levelBarrier);
             
-            GD.Randomize();
+            RandomManager.rng.Randomize();
             _objectsContainer = GetNode<Node>("ObjectsContainer");
             SpawnObjects();
         }
@@ -50,10 +52,21 @@ namespace Main
         {
             if (_selectedObject != null)
             {
-                _selectedObject.HandleOthersInput(@event);
+                _selectedObject.InputControlFlow(@event);
+                
+                @event.Dispose();
+                return;
             }
 
-            @event.Dispose();
+            if (_selectedObject == null && BaseObject.s_hoveredObject != null)
+            {
+                BaseObject.s_hoveredObject.InputControlFlow(@event);
+                @event.Dispose();
+                return;
+            }
+            
+
+           @event.Dispose();
         }
 
         private void SpawnObjects()
@@ -65,20 +78,27 @@ namespace Main
                 case OBJECTTYPE.SQUARE:
                     objectType = "SquareObject";
                     break;
+                case OBJECTTYPE.DOT:
+                    objectType = "DotObject";
+                    break;
+                case OBJECTTYPE.CIRCLE:
+                    objectType = "CircleObject";
+                    break;
+                case OBJECTTYPE.LINE:
+                    objectType = "LineObject";
+                    break;
 
                 default:
-                    return;
+                    objectType = "SquareObject";
+                    break;
             }
 
             PackedScene objectScene = ResourceLoader.Load<PackedScene>($"res://scenes/{objectType}.tscn");
 
             for (int _ = 0; _ < _objectsNumber; _++)
             {
-                uint positionX = GD.Randi() % (uint)Globals.ScreenInfo.Size[0];
-                uint positionY = GD.Randi() % (uint)Globals.ScreenInfo.Size[1];
-
                 BaseObject spawnedObject = objectScene.Instance<BaseObject>();
-                spawnedObject.Init(new Vector2(positionX, positionY));
+                spawnedObject.InitRandomObject();
                 _objectsContainer.AddChild(spawnedObject);
             }
 
@@ -99,18 +119,14 @@ namespace Main
             _gamestate = GAMESTATE.IDLE;
         }
 
-        public void _on_GameObjects_UpdateSelection(BaseObject sender, bool eliminateOldSelection, bool unSelectAll)
+        public void _on_GameObjects_UpdateSelection(bool eliminateOldSelection)
         {
             if (eliminateOldSelection)
             {
-                if (unSelectAll)
-                {
-                    _selectedObject = null;
-                    return;
-                }
+                _selectedObject.State = Globals.OBJECTSTATE.UNSELECETED;
             }
 
-            _selectedObject = sender;
+            _selectedObject = BaseObject.s_selectedObject;
         }
 
     }
