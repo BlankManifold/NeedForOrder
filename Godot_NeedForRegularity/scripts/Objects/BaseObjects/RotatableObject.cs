@@ -1,5 +1,5 @@
 using Godot;
-using System;
+
 
 namespace GameObjects
 {
@@ -36,42 +36,18 @@ namespace GameObjects
 
         public override void InputControlFlow(InputEvent @event)
         {
+            //IF UNSELECTED -> DO NOTHING SELECTION IN HANDLED IN MAIN
             if (_state == Globals.OBJECTSTATE.UNSELECETED)
             {
-                if (_imOnThisArea)
-                    HandleSelectionInput(@event);
                 return;
             }
-            
+
+            // IF NOT UNSELECTED -> HANDLE MOVING
             if (_state != Globals.OBJECTSTATE.UNSELECETED)
             {
-                if (!_imOnThisArea)
-                {
-                    if (_state == Globals.OBJECTSTATE.SELECTED)
-                    {
-                       HandleUnselectionInput(@event);
-                       return;
-                    }
-
-                    if (_state == Globals.OBJECTSTATE.MOVING)
-                    {
-                        HandleMotionInput(@event);
-                        return;
-                    }
-
-                    return;
-                } 
                 
-                if (_imOnThisArea)
-                {
-                    if (_state == Globals.OBJECTSTATE.MOVING || _state == Globals.OBJECTSTATE.PRESSED  || _state == Globals.OBJECTSTATE.SELECTED)
-                    {
-                        HandleMotionInput(@event);
-                        return;
-                    }   
-                    return;
-                }
-               
+                HandleMotionInput(@event);
+                   
                 return;
             }
 

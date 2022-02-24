@@ -1,5 +1,5 @@
 using Godot;
-using System;
+
 
 namespace GameObjects
 {
@@ -17,20 +17,9 @@ namespace GameObjects
             set { _clickedRelativePosition = value; }
         }
 
-        public static bool s_someoneSelected { get; set; } = false;
-        public static bool s_someonePressed { get; set; } = false;
-        public static bool s_someoneHovered { get; set; } = false;
-        public static bool s_imOnArea { get; set; } = false;
-
         public static BaseObject s_selectedObject = null;
         public static BaseObject s_hoveredObject = null;
-        protected bool _imOnThisArea = false;
-        public bool ImOnThisArea
-        {
-            get { return ImOnThisArea; }
-            set { _imOnThisArea = value; }
-        }
-
+       
         public Vector2 targetPosition { get; set; }
         protected Globals.OBJECTSTATE _state;
         public Globals.OBJECTSTATE State
@@ -63,12 +52,10 @@ namespace GameObjects
             else
                 Modulate = new Color(1, 1, 1);
 
-            if (s_hoveredObject == this)
+            if (s_hoveredObject == this && _state < Globals.OBJECTSTATE.SELECTED)
                 Modulate = new Color(1, 0, 0);
-
-
-
         }
+
         public override void _Ready()
         {
             targetPosition = GlobalPosition;
@@ -90,27 +77,29 @@ namespace GameObjects
 
         public virtual void InputControlFlow(InputEvent @event)
         {
-            if (_imOnThisArea)
+            //IF UNSELECTED -> DO NOTHING SELECTION IN HANDLED IN MAIN
+            if (_state == Globals.OBJECTSTATE.UNSELECETED)
             {
-                HandleSelectionInput(@event);
-                HandleMotionInput(@event);
+                return;
             }
-            else
+
+            // IF NOT UNSELECTED -> HANDLE MOVING
+            if (_state != Globals.OBJECTSTATE.UNSELECETED)
             {
-                HandleUnselectionInput(@event);
+                
                 HandleMotionInput(@event);
+                   
+                return;
             }
         }
 
         public void Select()
         {
-            bool eliminateOldSelection = false;
-
-            if (s_someoneSelected)
-                eliminateOldSelection = true;
-
-
-            EmitSignal(nameof(UpdateSelection), eliminateOldSelection);
+            _state = Globals.OBJECTSTATE.PRESSED;
+        }
+        public void UnSelect()
+        {
+            _state = Globals.OBJECTSTATE.UNSELECETED;
         }
         public virtual void Move(float _)
         {
@@ -150,35 +139,6 @@ namespace GameObjects
             return true;
 
         }
-        public BaseObject ReturnTopOne(Vector2 inputPosition)
-        {
-            Physics2DDirectSpaceState spaceState = GetWorld2d().DirectSpaceState;
-            Godot.Collections.Array objectsClicked = spaceState.IntersectPoint(inputPosition, 32, null, 2147483647, true, false);
-
-            BaseObject topNode = null;
-            int objectsNumber = objectsClicked.Count;
-
-      
-            if (objectsNumber > 0)
-            {
-                int currentIndex = GetIndex();
-                int maxIndex = -1;
-                foreach (Godot.Collections.Dictionary objectClicked in objectsClicked)
-                {
-                    if (objectClicked["collider"] is BaseObject node)
-                    {
-                        int index = node.GetIndex();
-                        if (index > maxIndex)
-                        {
-                            topNode = node;
-                            maxIndex = index;
-                        }
-                    }
-                }
-            }
-            
-            return topNode;
-        }
 
         public virtual void HandleMotionInput(InputEvent @event)
         {
@@ -201,16 +161,7 @@ namespace GameObjects
                 if (mouseButtonEvent.IsActionReleased("select"))
                 {
                     _state = Globals.OBJECTSTATE.SELECTED;
-                    s_someonePressed = false;
 
-                    BaseObject topNodeInExitedPoint = ReturnTopOne(mouseButtonEvent.Position);
-                    if (topNodeInExitedPoint != this && topNodeInExitedPoint != null)
-                    {
-                        _imOnThisArea = false;
-                        s_hoveredObject = topNodeInExitedPoint;
-                        s_hoveredObject.ImOnThisArea = true;
-                    }
-                   
                     mouseButtonEvent.Dispose();
                     return;
                 }
@@ -218,7 +169,6 @@ namespace GameObjects
                 if (mouseButtonEvent.IsActionPressed("select"))
                 {
                     _state = Globals.OBJECTSTATE.PRESSED;
-                    s_someonePressed = true;
 
                     _clickedRelativePosition = mouseButtonEvent.Position - GlobalPosition;
                     mouseButtonEvent.Dispose();
@@ -228,106 +178,52 @@ namespace GameObjects
 
         }
 
-        public virtual void HandleUnselectionInput(InputEvent @event)
-        {
-            // HANDLE UNSELECT THE OBJECT IF U CLICK OUTSIDE OF IT -> UNSELECTED
-            if (@event is InputEventMouseButton mouseButtonEvent && IsInstanceValid(@event))
-            {
-                if (mouseButtonEvent.IsActionPressed("select"))
-                {
-                    _state = Globals.OBJECTSTATE.UNSELECETED;
+        // public virtual void HandleUnselectionInput(InputEvent @event)
+        // {
+        //     // HANDLE UNSELECT THE OBJECT IF U CLICK OUTSIDE OF IT -> UNSELECTED
+        //     if (@event is InputEventMouseButton mouseButtonEvent && IsInstanceValid(@event))
+        //     {
+        //         if (mouseButtonEvent.IsActionPressed("select"))
+        //         {
+        //             _state = Globals.OBJECTSTATE.UNSELECETED;
+        //             UnSelect();
+        //             if (s_someoneHovered)
+        //             {
+        //                 s_selectedObject = s_hoveredObject;
+        //                 s_selectedObject.State = Globals.OBJECTSTATE.PRESSED;
+        //                 s_selectedObject.ClickedRelativePosition = mouseButtonEvent.Position - s_selectedObject.GlobalPosition;
+        //                 Select();
+        //                 s_someoneSelected = true;
+        //                 s_someonePressed = true;
+        //             }
+        //             else
+        //             {
+        //                 s_selectedObject = null;
+        //                 Select();
+        //                 s_someoneSelected = false;
+        //                 s_someonePressed = false;
+        //             }
+        //             mouseButtonEvent.Dispose();
+        //             return;
+        //         }
+        //     }
+        // }
+        // public virtual void HandleSelectionInput(InputEvent @event)
+        // {
+        //     if (@event is InputEventMouseButton mouseButtonEvent && IsInstanceValid(@event))
+        //     {
 
-                    if (s_someoneHovered)
-                    {
-                        s_selectedObject = s_hoveredObject;
-                        s_selectedObject.State = Globals.OBJECTSTATE.PRESSED;
-                        s_selectedObject.ClickedRelativePosition = mouseButtonEvent.Position - s_selectedObject.GlobalPosition;
-                        Select();
-                        s_someoneSelected = true;
-                        s_someonePressed = true;
-                    }
-                    else
-                    {
-                        s_selectedObject = null;
-                        Select();
-                        s_someoneSelected = false;
-                        s_someonePressed = false;
-                    }
-                    mouseButtonEvent.Dispose();
-                    return;
-                }
-            }
-        }
-        public virtual void HandleSelectionInput(InputEvent @event)
-        {
-            if (@event is InputEventMouseButton mouseButtonEvent && checkIfOnTop(mouseButtonEvent.Position) && IsInstanceValid(@event))
-            {
+        //         if (mouseButtonEvent.IsActionPressed("select"))
+        //         {
+        //             _clickedRelativePosition = mouseButtonEvent.Position - GlobalPosition;
 
-                if (mouseButtonEvent.IsActionPressed("select"))
-                {
-                    _state = Globals.OBJECTSTATE.PRESSED;
+        //             Select();
 
-                    _clickedRelativePosition = mouseButtonEvent.Position - GlobalPosition;
-
-                    s_selectedObject = this;
-                    Select();
-                    s_someoneSelected = true;
-                    s_someonePressed = true;
-
-                    mouseButtonEvent.Dispose();
-                    return;
-                }
-            }
-        }
-
-        public void _on_BaseObject_mouse_exited()
-        {
-            if (!s_someonePressed || _state == Globals.OBJECTSTATE.PRESSED)
-            {
-                BaseObject topNodeInExitedPoint = ReturnTopOne(GetViewport().GetMousePosition());
-                
-                if (topNodeInExitedPoint == null)
-                {
-                    _imOnThisArea = false;
-                    s_imOnArea = false;
-                    s_hoveredObject = null;
-                    s_someoneHovered = false;
-                }
-                else
-                {
-                    _imOnThisArea = false;
-                    s_hoveredObject = topNodeInExitedPoint;
-                    s_hoveredObject.ImOnThisArea = true;
-                }
-            }
-        }
-        public void _on_BaseObject_mouse_entered()
-        {
-
-            if (!s_someonePressed || _state == Globals.OBJECTSTATE.PRESSED)
-            {
-                if (s_hoveredObject == null)
-                {
-                    _imOnThisArea = true;
-                    s_imOnArea = true;
-                    s_hoveredObject = this;
-                    s_someoneHovered = true;
-
-                    return;
-                }
-
-                if (checkIfOnTop(GetViewport().GetMousePosition()))
-                {
-                    s_hoveredObject.ImOnThisArea = false;
-                    _imOnThisArea = true;
-                    s_imOnArea = true;
-                    s_hoveredObject = this;
-                    s_hoveredObject.ImOnThisArea = true;
-                    s_someoneHovered = true;
-                }
-            }
-
-        }
+        //             mouseButtonEvent.Dispose();
+        //             return;
+        //         }
+        //     }
+        // }
 
 
     }
