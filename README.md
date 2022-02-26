@@ -37,7 +37,7 @@ and (maybe?) save the configurations created. You can also choose to use a backg
 * All inputs are handled in `Main` in a main `_UnhandleInput` function that first handles in a generic way the selection/unselection of object and then calls 
   `InputControlFlow` function of the selected object 
 * Create `RotatableObject` node: inherited scene of `BaseObject` with a second `KinematicBody2D` to be pressed to control the rotation   
-* Created `RotatableObject` as child of `BaseObject` and as `IRotatable`: implemented the `InputControlFlow` function to handle motion/rotation -> basically 
+* Created `RotatableObject` as child of `BaseObject` and as `IRotatable`: implemented the `InputControlFlow` function to handle motion/rotation → basically 
   I recreated the selection/unselection/move/rotate functionalities of Godot's editor (or any 2d design software) but with the challening interactions beetwen objects's 
   motion/rotation and `LevelBarriers` constraints
 * Implemented a `_overlapple` variable for the objects (modifies with code the collision layer/mask)
