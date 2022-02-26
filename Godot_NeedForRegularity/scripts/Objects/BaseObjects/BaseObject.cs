@@ -10,15 +10,18 @@ namespace GameObjects
         [Export]
         protected bool _overlappaple = true;
 
-        private Vector2 _clickedRelativePosition;
+        protected Vector2 _clickedRelativePosition;
         public Vector2 ClickedRelativePosition
         {
             get { return _clickedRelativePosition; }
             set { _clickedRelativePosition = value; }
         }
 
+        public static bool s_selectable = true;
         public static BaseObject s_selectedObject = null;
         public static BaseObject s_hoveredObject = null;
+
+      
        
         public Vector2 targetPosition { get; set; }
         protected Globals.OBJECTSTATE _state;
@@ -33,6 +36,7 @@ namespace GameObjects
         [Signal]
         public delegate void UpdateSelection(bool eliminateOldSelection);
 
+
         public virtual void Init(Vector2 position)
         {
             GlobalPosition = position;
@@ -45,22 +49,21 @@ namespace GameObjects
             GlobalPosition = new Vector2(positionX, positionY);
         }
 
-        public override void _Process(float delta)
-        {
-            if (_state >= Globals.OBJECTSTATE.SELECTED)
-                Modulate = new Color(0, 0, 0);
-            else
-                Modulate = new Color(1, 1, 1);
+        // public override void _Process(float delta)
+        // {
+        //     if (_state >= Globals.OBJECTSTATE.SELECTED)
+        //         Modulate = new Color(0, 0, 0);
+        //     else
+        //         Modulate = new Color(1, 1, 1);
 
-            if (s_hoveredObject == this && _state < Globals.OBJECTSTATE.SELECTED)
-                Modulate = new Color(1, 0, 0);
-        }
+        //     if (s_hoveredObject == this && _state < Globals.OBJECTSTATE.SELECTED)
+        //         Modulate = new Color(1, 0, 0);
+        // }
 
         public override void _Ready()
         {
             targetPosition = GlobalPosition;
             // Modulate = new Color(GD.Randf(), GD.Randf(), GD.Randf());
-
 
             if (_overlappaple)
             {
@@ -71,20 +74,18 @@ namespace GameObjects
                 CollisionMask = 3;
             }
 
-            _main = (Node2D)GetTree().GetNodesInGroup("main")[0];
-            Connect(nameof(UpdateSelection), _main, "_on_GameObjects_UpdateSelection");
         }
 
         public virtual void InputControlFlow(InputEvent @event)
         {
             //IF UNSELECTED -> DO NOTHING SELECTION IN HANDLED IN MAIN
-            if (_state == Globals.OBJECTSTATE.UNSELECETED)
+            if (_state == Globals.OBJECTSTATE.UNSELECTED)
             {
                 return;
             }
 
             // IF NOT UNSELECTED -> HANDLE MOVING
-            if (_state != Globals.OBJECTSTATE.UNSELECETED)
+            if (_state != Globals.OBJECTSTATE.UNSELECTED)
             {
                 
                 HandleMotionInput(@event);
@@ -93,51 +94,29 @@ namespace GameObjects
             }
         }
 
-        public void Select()
+        public virtual void SelectObject()
         {
             _state = Globals.OBJECTSTATE.PRESSED;
         }
-        public void UnSelect()
+        public virtual void UnSelectObject()
         {
-            _state = Globals.OBJECTSTATE.UNSELECETED;
+            _state = Globals.OBJECTSTATE.UNSELECTED;
         }
-        public virtual void Move(float _)
+        public virtual void MoveObject()
         {
             Vector2 direction = (GlobalPosition).DirectionTo(targetPosition);
             float speed = targetPosition.DistanceTo(GlobalPosition) * _quickness;
 
             MoveAndSlide(direction * speed);
+            // float x = Mathf.Clamp(targetPosition.x,0,Globals.ScreenInfo.VisibleRectSize.x);
+            // float y = Mathf.Clamp(targetPosition.y,0,Globals.ScreenInfo.VisibleRectSize.y);
+            // GlobalPosition = new Vector2(x,y);
 
         }
 
-        public void setupFollowMouse(InputEventMouseMotion mouseMotion)
+        public void setupFollowMouse(Vector2 followPosition)
         {
-            targetPosition = mouseMotion.Position - _clickedRelativePosition;
-        }
-
-        public bool checkIfOnTop(Vector2 inputPosition)
-        {
-            Physics2DDirectSpaceState spaceState = GetWorld2d().DirectSpaceState;
-            Godot.Collections.Array objectsClicked = spaceState.IntersectPoint(inputPosition, 32, null, 2147483647, true, false);
-
-            if (objectsClicked.Count > 1)
-            {
-                int currentIndex = GetIndex();
-                // int maxIndex = 0;
-                foreach (Godot.Collections.Dictionary objectClicked in objectsClicked)
-                {
-                    Node node = ((Node)objectClicked["collider"]);
-                    int index = node.GetIndex();
-                    if (index > currentIndex)
-                    {
-                        return false;
-                        //maxIndex = index;
-                    }
-                }
-                // return (currentIndex == maxIndex);
-            }
-            return true;
-
+            targetPosition = followPosition - _clickedRelativePosition;
         }
 
         public virtual void HandleMotionInput(InputEvent @event)
@@ -149,7 +128,7 @@ namespace GameObjects
                     _state = Globals.OBJECTSTATE.MOVING;
                 }
 
-                setupFollowMouse(mouseMotion);
+                setupFollowMouse(mouseMotion.Position);
 
                 @event.Dispose();
                 return;
@@ -178,54 +157,15 @@ namespace GameObjects
 
         }
 
-        // public virtual void HandleUnselectionInput(InputEvent @event)
-        // {
-        //     // HANDLE UNSELECT THE OBJECT IF U CLICK OUTSIDE OF IT -> UNSELECTED
-        //     if (@event is InputEventMouseButton mouseButtonEvent && IsInstanceValid(@event))
-        //     {
-        //         if (mouseButtonEvent.IsActionPressed("select"))
-        //         {
-        //             _state = Globals.OBJECTSTATE.UNSELECETED;
-        //             UnSelect();
-        //             if (s_someoneHovered)
-        //             {
-        //                 s_selectedObject = s_hoveredObject;
-        //                 s_selectedObject.State = Globals.OBJECTSTATE.PRESSED;
-        //                 s_selectedObject.ClickedRelativePosition = mouseButtonEvent.Position - s_selectedObject.GlobalPosition;
-        //                 Select();
-        //                 s_someoneSelected = true;
-        //                 s_someonePressed = true;
-        //             }
-        //             else
-        //             {
-        //                 s_selectedObject = null;
-        //                 Select();
-        //                 s_someoneSelected = false;
-        //                 s_someonePressed = false;
-        //             }
-        //             mouseButtonEvent.Dispose();
-        //             return;
-        //         }
-        //     }
-        // }
-        // public virtual void HandleSelectionInput(InputEvent @event)
-        // {
-        //     if (@event is InputEventMouseButton mouseButtonEvent && IsInstanceValid(@event))
-        //     {
-
-        //         if (mouseButtonEvent.IsActionPressed("select"))
-        //         {
-        //             _clickedRelativePosition = mouseButtonEvent.Position - GlobalPosition;
-
-        //             Select();
-
-        //             mouseButtonEvent.Dispose();
-        //             return;
-        //         }
-        //     }
-        // }
+        public virtual string InfoString()
+        {
+            string text =  $"STATE: {_state}\n Selectable: {s_selectable}";
 
 
+            return text;
+        }
+
+       
     }
 
 }

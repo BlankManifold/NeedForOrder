@@ -11,7 +11,7 @@ namespace BackgroundAndLevel
         private CollisionShape2D _left;
         private CollisionShape2D _right;
 
-        private int _width = 10;
+        private int _width = 100;
 
         public override void _Ready()
         {

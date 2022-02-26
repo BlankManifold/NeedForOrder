@@ -1,16 +1,44 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://scenes/BaseObject.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scripts/Objects/BaseObjects/RotatableObject.cs" type="Script" id=2]
 
 [sub_resource type="CircleShape2D" id=1]
 
+[sub_resource type="CircleShape2D" id=2]
+radius = 100.0
+
 [node name="RotatableObject" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 
-[node name="RotationArea" type="Area2D" parent="." index="1"]
-collision_layer = 4
-collision_mask = 4
+[node name="RotationArea" type="KinematicBody2D" parent="." index="1"]
+collision_layer = 16
+collision_mask = 2
+input_pickable = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RotationArea" index="0"]
+[node name="ColorRect" type="ColorRect" parent="RotationArea" index="0"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -7.0
+margin_top = -7.0
+margin_right = 7.0
+margin_bottom = 7.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RotationArea" index="1"]
 shape = SubResource( 1 )
+
+[node name="RotationAreaRadius2D" type="Area2D" parent="." index="2"]
+collision_layer = 8
+collision_mask = 0
+input_pickable = false
+
+[node name="RotationRadiusShape" type="CollisionShape2D" parent="RotationAreaRadius2D" index="0"]
+shape = SubResource( 2 )
+
+[connection signal="mouse_entered" from="RotationArea" to="." method="_on_RotationArea_mouse_entered"]
+[connection signal="mouse_exited" from="RotationArea" to="." method="_on_RotationArea_mouse_exited"]

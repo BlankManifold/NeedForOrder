@@ -3,7 +3,8 @@ namespace GameObjects
 {
     public interface IRotatable
     {
-        void RotateObject(float angle);
+        float targetRotationAngle {get;}
+        void RotateObject();
 
     }
 }

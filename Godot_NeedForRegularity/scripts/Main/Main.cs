@@ -9,10 +9,13 @@ namespace Main
     {
         private GAMESTATE _gamestate = GAMESTATE.IDLE;
         private OBJECTTYPE _objectType = OBJECTTYPE.SQUARE;
-        private uint _objectsNumber = 10;
+        private uint _objectsNumber = 3;
         private Node _objectsContainer;
 
         private Area2D _mouseArea;
+        private Label _label;
+
+
 
 
 
@@ -31,22 +34,27 @@ namespace Main
             SpawnObjects();
 
             _mouseArea = GetNode<Area2D>("MouseArea");
+
+            _label = GetNode<Label>("Label");
         }
         public override void _PhysicsProcess(float delta)
         {
             UpdateState();
             UpdateMouseAreaPosition(GetGlobalMousePosition());
-
-
-            // Label label = GetNode<Label>("Label");
-            // label.Text = "VisibleRect Size:" + GetViewport().GetVisibleRect().Size.ToString();
-            // label.Text += "\n Viewport Size:" + GetViewport().Size.ToString();
-            // label.Text += "\n Viewport OverrideSize:" + GetViewport().GetSizeOverride().ToString();
+            
+            if (BaseObject.s_selectedObject != null)
+            {
+                _label.Text = BaseObject.s_selectedObject.InfoString();
+            }
 
             switch (_gamestate)
             {
                 case GAMESTATE.MOVING:
-                    BaseObject.s_selectedObject.Move(delta);
+                    BaseObject.s_selectedObject.MoveObject();
+                    break;
+                case GAMESTATE.ROTATING:
+                    RotatableObject castedObject = (RotatableObject)BaseObject.s_selectedObject;
+                    castedObject.RotateObject();
                     break;
                 case GAMESTATE.IDLE:
                     break;
@@ -79,12 +87,16 @@ namespace Main
 
         public override void _UnhandledInput(InputEvent @event)
         {
-            
+
             // UPDATE SELECTION ONLY IF BUTTON CLICKED/PRESSED, UPDATE HOVERED ALSO IF U RELEASE BUTTON
-            if (@event is InputEventMouseButton mouseButtonEvent && @event.IsAction("select"))
+            if (BaseObject.s_selectable)
             {
-                UpdateHoveredAndSelectedObject(@event);
-                
+                BaseObject.s_hoveredObject = ReturnTopObject();
+
+                if (@event is InputEventMouseButton && Input.IsActionJustPressed("select"))
+                {
+                    UpdateHoveredAndSelectedObject();
+                }
             }
 
             // IF SOMEONE SELECTED -> HANDLE IT
@@ -125,11 +137,14 @@ namespace Main
 
             PackedScene objectScene = ResourceLoader.Load<PackedScene>($"res://scenes/{objectType}.tscn");
 
-            for (int _ = 0; _ < _objectsNumber; _++)
+          
+            for (int i = 0; i < _objectsNumber; i++)
             {
+                
                 BaseObject spawnedObject = objectScene.Instance<BaseObject>();
                 spawnedObject.InitRandomObject();
                 _objectsContainer.AddChild(spawnedObject);
+               
             }
 
 
@@ -138,72 +153,73 @@ namespace Main
         {
             if (BaseObject.s_selectedObject != null)
             {
-
-                if (BaseObject.s_selectedObject.State == OBJECTSTATE.MOVING)
+                switch (BaseObject.s_selectedObject.State)
                 {
-                    _gamestate = GAMESTATE.MOVING;
-                    return;
+
+                    case OBJECTSTATE.MOVING:
+                        _gamestate = GAMESTATE.MOVING;
+                        break;
+                    case OBJECTSTATE.ROTATING:
+                        _gamestate = GAMESTATE.ROTATING;
+                        break;
+                    default:
+                        _gamestate = GAMESTATE.IDLE;
+                        break;
                 }
+                return;
             }
 
             _gamestate = GAMESTATE.IDLE;
         }
 
-        private void UpdateHoveredAndSelectedObject(InputEvent @event)
+        private void UpdateHoveredAndSelectedObject()
         {
-            BaseObject.s_hoveredObject = ReturnTopObject();
 
-            // IF U JUST CLICKED -> SEE IF U NEED TO CHANGE SELECTION
-            if (Input.IsActionJustPressed("select"))
+            // IF U NOT CLICK ON A OBJECT...
+            if (BaseObject.s_hoveredObject == null)
             {
-                // IF U NOT CLICK ON A OBJECT...
-                if (BaseObject.s_hoveredObject == null)
+                // and SOME OBJECTED WAS SELECTED -> UNSELECT
+                if (BaseObject.s_selectedObject != null)
                 {
-                    // and SOME OBJECTED WAS SELECTED -> UNSELECT
-                    if (BaseObject.s_selectedObject != null)
-                    {
-                        BaseObject.s_selectedObject.UnSelect();
-                        BaseObject.s_selectedObject = null;
-                    }
-
-                    // and NO OBJECTED WAS SELECTED -> DO NOTHING
-                    return;
-                }
-                // IF U CLICK ON SOMETHING...
-                else
-                {
-                    // and U CLICKED ON THE SAME ONE -> DO NOTHING
-                    if (BaseObject.s_selectedObject == BaseObject.s_hoveredObject)
-                    {
-                        return;
-                    }
-
-                    // and NO ONE WAS SELECTED -> SELECT THAT ONE
-                    if (BaseObject.s_selectedObject == null)
-                    {
-                        BaseObject.s_hoveredObject.Select();
-                        BaseObject.s_selectedObject = BaseObject.s_hoveredObject;
-                        return;
-                    }
-
-                    // and SOME WAS ALREADY SELECTED -> CHANGE SELECTION: UNSELECT OLD AND SELECT HOVERED ONE
-                    if (BaseObject.s_selectedObject != null)
-                    {
-                        BaseObject.s_hoveredObject.Select();
-                        BaseObject.s_selectedObject.UnSelect();
-                        BaseObject.s_selectedObject = BaseObject.s_hoveredObject;
-                    }
-
+                    BaseObject.s_selectedObject.UnSelectObject();
+                    BaseObject.s_selectedObject = null;
                 }
 
+                // and NO OBJECTED WAS SELECTED -> DO NOTHING
                 return;
             }
-            
-            // IF U RELEASE DO NOTHING;
+            // IF U CLICK ON SOMETHING...
+            else
+            {
+                // and U CLICKED ON THE SAME ONE -> DO NOTHING
+                if (BaseObject.s_selectedObject == BaseObject.s_hoveredObject)
+                {
+                    return;
+                }
+
+                // and NO ONE WAS SELECTED -> SELECT THAT ONE
+                if (BaseObject.s_selectedObject == null)
+                {
+                    BaseObject.s_hoveredObject.SelectObject();
+                    BaseObject.s_selectedObject = BaseObject.s_hoveredObject;
+                    return;
+                }
+
+                // and SOME WAS ALREADY SELECTED -> CHANGE SELECTION: UNSELECT OLD AND SELECT HOVERED ONE
+                if (BaseObject.s_selectedObject != null)
+                {
+                    BaseObject.s_hoveredObject.SelectObject();
+                    BaseObject.s_selectedObject.UnSelectObject();
+                    BaseObject.s_selectedObject = BaseObject.s_hoveredObject;
+                }
+
+            }
         }
         private void UpdateMouseAreaPosition(Vector2 newPosition)
         {
-            _mouseArea.GlobalPosition = newPosition;
+            float x = Mathf.Clamp(newPosition.x,0,Globals.ScreenInfo.VisibleRectSize.x);
+            float y = Mathf.Clamp(newPosition.y,0,Globals.ScreenInfo.VisibleRectSize.y);
+            _mouseArea.GlobalPosition = new Vector2(x,y);
         }
 
 

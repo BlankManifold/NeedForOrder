@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://scripts/Objects/SpecificObjects/SquareObject.cs" type="Script" id=1]
 [ext_resource path="res://scenes/RotatableObject.tscn" type="PackedScene" id=2]
@@ -6,8 +6,14 @@
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 50, 50 )
 
+[sub_resource type="CircleShape2D" id=2]
+
+[sub_resource type="CircleShape2D" id=3]
+
 [node name="SquareObject" instance=ExtResource( 2 )]
 script = ExtResource( 1 )
+_lenght = 100
+_standardLenght = 100
 
 [node name="ColorRect" type="ColorRect" parent="." index="0"]
 anchor_left = 0.5
@@ -15,9 +21,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 margin_left = -50.0
-margin_top = -49.0
+margin_top = -50.0
 margin_right = 50.0
-margin_bottom = 51.0
+margin_bottom = 50.0
 rect_pivot_offset = Vector2( 50, 50 )
 mouse_filter = 2
 __meta__ = {
@@ -25,5 +31,48 @@ __meta__ = {
 }
 
 [node name="SelectionAreaShape" parent="." index="1"]
-position = Vector2( 0, 1 )
 shape = SubResource( 1 )
+
+[node name="RotationArea" parent="." index="2"]
+position = Vector2( 70, 70 )
+
+[node name="ColorRect" parent="RotationArea" index="0"]
+mouse_filter = 2
+
+[node name="CollisionShape2D" parent="RotationArea" index="1"]
+shape = SubResource( 2 )
+
+[node name="RotationRadiusShape" parent="RotationAreaRadius2D" index="0"]
+disabled = true
+
+[node name="Line2D" type="Line2D" parent="." index="4"]
+points = PoolVector2Array( 0, 0, 0, 0, 128, 0 )
+
+[node name="Label" type="Label" parent="Line2D" index="0"]
+margin_left = 96.0
+margin_top = 10.0
+margin_right = 104.0
+margin_bottom = 24.0
+text = "X"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Line2D2" type="Line2D" parent="." index="5"]
+points = PoolVector2Array( 0, 0, 0, 0, 0, 128 )
+
+[node name="Label" type="Label" parent="Line2D2" index="0"]
+margin_left = 10.0
+margin_top = 112.0
+margin_right = 17.0
+margin_bottom = 126.0
+text = "Y"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CheckingPos" type="CollisionShape2D" parent="." index="6"]
+position = Vector2( 0, 1 )
+shape = SubResource( 3 )
+disabled = true

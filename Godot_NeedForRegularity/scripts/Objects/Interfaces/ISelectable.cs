@@ -4,8 +4,8 @@ namespace GameObjects
 {
     public interface ISelectable
     {
-        void Select();
-        void UnSelect();
+        void SelectObject();
+        void UnSelectObject();
         
     }
 
