@@ -6,8 +6,8 @@ Another much needed learnirng project, building on the (little) knowlegde acquir
 ## Game objective
 
 Reorganize some chaotically placed geometric objects at will following your inner NeedForRegularity. You can 
-choose to reorganize randomally placed: lines, squares, dots and disk. There is no specific goal: create your pattern/order, lower the entropy
-and (maybe?) save the configurations created. You can also choose to use a background (faded) pattern to inspire and facilitate your need for regularity.
+choose to reorganize randomally placed lines, squares, dots and disks. There is no specific goal: create your pattern/order, lower the entropy
+and (maybe?) save the configurations you created. You can also choose to use a background (faded) pattern to inspire and facilitate your need for regularity.
 ## My goals:
 
 * Build and complete another little abstract game (completely on my own)
@@ -15,7 +15,7 @@ and (maybe?) save the configurations created. You can also choose to use a backg
 * Learing new C# stuff, I will try to use more C# specific features even if not necessary or more complex: interfaces, delegates, events(when to use events instead of Godot's signals?), "when to use inheritance?", namespaces, setters...
 * Try to write more SOLID code, more reusable, more generic (...not high hopes about these...)
 * Try a different (from StickyBlocks) game structure planned in UML: using more state machine pattern, some globals (when makes sense), some specific managers classes (inputs manager, UI manager, main manager,...)     
-* Put more faith in Goodt and less in my maths skills (I studied theoretical physics): Before going into the rabbit hole of mathematics, try to solve problems using Godot's features! 
+* Put more faith in Godot and less in my maths skills (I studied theoretical physics): before going into the rabbit hole of mathematics, try to solve problems using Godot's features! 
 * Create a base game mechanics (select/drag/drop/rotate/scale) to be reused in the future in different games (for example in a abstract or also not abstract puzzle game).
 ## Progress updates
 
