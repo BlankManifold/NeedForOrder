@@ -4,6 +4,7 @@ export.cfg
 export_presets.cfg
 export/
 android/
+*.log
 
 # Mono-specific ignores
 .mono/

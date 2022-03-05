@@ -18,12 +18,13 @@ namespace GameObjects
         }
 
         public static bool s_selectable = true;
+        public static bool s_someonePressed = false;
         public static BaseObject s_selectedObject = null;
         public static BaseObject s_hoveredObject = null;
 
       
        
-        public Vector2 targetPosition { get; set; }
+        public Vector2 RelevantPosition { get; set; }
         protected Globals.OBJECTSTATE _state;
         public Globals.OBJECTSTATE State
         {
@@ -35,7 +36,7 @@ namespace GameObjects
 
         [Signal]
         public delegate void UpdateSelection(bool eliminateOldSelection);
-
+       
 
         public virtual void Init(Vector2 position)
         {
@@ -43,8 +44,8 @@ namespace GameObjects
         }
         public virtual void InitRandomObject()
         {
-            uint positionX = GD.Randi() % (uint)Globals.ScreenInfo.Size[0];
-            uint positionY = GD.Randi() % (uint)Globals.ScreenInfo.Size[1];
+            uint positionX = GD.Randi() % (uint)Globals.ScreenInfo.PlayableSize[0];
+            uint positionY = GD.Randi() % (uint)Globals.ScreenInfo.PlayableSize[1];
 
             GlobalPosition = new Vector2(positionX, positionY);
         }
@@ -62,16 +63,12 @@ namespace GameObjects
 
         public override void _Ready()
         {
-            targetPosition = GlobalPosition;
+            RelevantPosition = GlobalPosition;
             // Modulate = new Color(GD.Randf(), GD.Randf(), GD.Randf());
 
-            if (_overlappaple)
+            if (!_overlappaple)
             {
-                CollisionMask = 2;
-            }
-            else
-            {
-                CollisionMask = 3;
+                CollisionMask += 1;
             }
 
         }
@@ -102,21 +99,21 @@ namespace GameObjects
         {
             _state = Globals.OBJECTSTATE.UNSELECTED;
         }
-        public virtual void MoveObject()
+        public virtual void MoveObject(float _)
         {
-            Vector2 direction = (GlobalPosition).DirectionTo(targetPosition);
-            float speed = targetPosition.DistanceTo(GlobalPosition) * _quickness;
+            Vector2 direction = (GlobalPosition).DirectionTo(RelevantPosition);
+            float speed = RelevantPosition.DistanceTo(GlobalPosition) * _quickness;
 
             MoveAndSlide(direction * speed);
-            // float x = Mathf.Clamp(targetPosition.x,0,Globals.ScreenInfo.VisibleRectSize.x);
-            // float y = Mathf.Clamp(targetPosition.y,0,Globals.ScreenInfo.VisibleRectSize.y);
+            // float x = Mathf.Clamp(RelevantPosition.x,0,Globals.ScreenInfo.VisibleRectSize.x);
+            // float y = Mathf.Clamp(RelevantPosition.y,0,Globals.ScreenInfo.VisibleRectSize.y);
             // GlobalPosition = new Vector2(x,y);
 
         }
 
-        public void setupFollowMouse(Vector2 followPosition)
+        public virtual void setupFollowMouse(Vector2 followPosition)
         {
-            targetPosition = followPosition - _clickedRelativePosition;
+            RelevantPosition = followPosition - _clickedRelativePosition;
         }
 
         public virtual void HandleMotionInput(InputEvent @event)
@@ -140,6 +137,7 @@ namespace GameObjects
                 if (mouseButtonEvent.IsActionReleased("select"))
                 {
                     _state = Globals.OBJECTSTATE.SELECTED;
+                    s_someonePressed = false;
 
                     mouseButtonEvent.Dispose();
                     return;
@@ -148,6 +146,7 @@ namespace GameObjects
                 if (mouseButtonEvent.IsActionPressed("select"))
                 {
                     _state = Globals.OBJECTSTATE.PRESSED;
+                    s_someonePressed = true;
 
                     _clickedRelativePosition = mouseButtonEvent.Position - GlobalPosition;
                     mouseButtonEvent.Dispose();

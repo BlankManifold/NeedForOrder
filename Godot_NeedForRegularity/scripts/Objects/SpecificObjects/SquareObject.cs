@@ -29,8 +29,8 @@ namespace GameObjects
         public override void InitRandomObject()
         {
             int offset = _lenght / 2;
-            int positionX = Globals.RandomManager.rng.RandiRange(offset, (int)Globals.ScreenInfo.Size[0] - offset);
-            int positionY = Globals.RandomManager.rng.RandiRange(offset, (int)Globals.ScreenInfo.Size[1] - offset);
+            int positionX = Globals.RandomManager.rng.RandiRange(offset, (int)Globals.ScreenInfo.PlayableSize[0] - offset);
+            int positionY = Globals.RandomManager.rng.RandiRange(offset, (int)Globals.ScreenInfo.PlayableSize[1] - offset);
 
             float angleDegrees = Globals.RandomManager.rng.RandfRange(0, 90);
 

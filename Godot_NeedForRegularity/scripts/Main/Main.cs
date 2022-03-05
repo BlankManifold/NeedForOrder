@@ -15,7 +15,11 @@ namespace Main
         private Area2D _mouseArea;
         private Label _label;
 
+        private GameUI.GameUI _gameUI;
 
+        private Godot.Collections.Array<GameUI.ScrollButtonGameUI> _UIButtons;
+
+        private bool _someoneWasPressed = false;
 
 
 
@@ -23,9 +27,14 @@ namespace Main
         {
             Globals.ScreenInfo.UpdateScreenInfo(GetViewport());
 
-            PackedScene levelBarrierScene = (PackedScene)ResourceLoader.Load("res://scenes/LevelBarrier.tscn");
+            // GetViewport().GuiDisableInput = true;   
+            _gameUI = GetNode<GameUI.GameUI>("GameUILayer/GameUI");
+            _UIButtons = new Godot.Collections.Array<GameUI.ScrollButtonGameUI>(GetTree().GetNodesInGroup("UIButton"));
+
+            PackedScene levelBarrierScene = (PackedScene)ResourceLoader.Load("res://scenes/BackgroundAndLevel/LevelBarrier.tscn");
             BackgroundAndLevel.LevelBarrier levelBarrier = levelBarrierScene.Instance<BackgroundAndLevel.LevelBarrier>();
             levelBarrier.Name = "LevelBarrier";
+            levelBarrier.YLimitOffset = (int)_gameUI.RectSize.y;
             AddChild(levelBarrier);
 
             RandomManager.rng.Randomize();
@@ -41,6 +50,7 @@ namespace Main
         {
             UpdateState();
             UpdateMouseAreaPosition(GetGlobalMousePosition());
+            // UpdateMouseFilterUI();
             
             if (BaseObject.s_selectedObject != null)
             {
@@ -50,7 +60,7 @@ namespace Main
             switch (_gamestate)
             {
                 case GAMESTATE.MOVING:
-                    BaseObject.s_selectedObject.MoveObject();
+                    BaseObject.s_selectedObject.MoveObject(delta);
                     break;
                 case GAMESTATE.ROTATING:
                     RotatableObject castedObject = (RotatableObject)BaseObject.s_selectedObject;
@@ -135,7 +145,7 @@ namespace Main
                     break;
             }
 
-            PackedScene objectScene = ResourceLoader.Load<PackedScene>($"res://scenes/{objectType}.tscn");
+            PackedScene objectScene = ResourceLoader.Load<PackedScene>($"res://scenes/SpecificObjects/{objectType}.tscn");
 
           
             for (int i = 0; i < _objectsNumber; i++)
@@ -222,6 +232,34 @@ namespace Main
             _mouseArea.GlobalPosition = new Vector2(x,y);
         }
 
+        // private void UpdateMouseFilterUI()
+        // {
+        //     if (BaseObject.s_someonePressed && !_someoneWasPressed)
+        //     {
+        //         _someoneWasPressed = true;
+        //         // GetViewport().GuiDisableInput = true;
+        //     }
+
+        //     if (!BaseObject.s_someonePressed && _someoneWasPressed)
+        //     {
+        //         _someoneWasPressed = false;
+        //         // GetViewport().GuiDisableInput = false;
+
+        //     }
+
+        // }
+
+        public void _on_ScrollGameUI_ObjectTypeChanged(OBJECTTYPE type)
+        {
+            foreach (Node child in _objectsContainer.GetChildren())
+            {
+                child.QueueFree();                
+            }
+            _gamestate = GAMESTATE.IDLE;
+            _objectType = type;
+            
+            SpawnObjects(); 
+        }
 
     }
 }

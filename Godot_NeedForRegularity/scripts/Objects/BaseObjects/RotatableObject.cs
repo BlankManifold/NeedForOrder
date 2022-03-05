@@ -16,12 +16,11 @@ namespace GameObjects
         }
 
         private Vector2 _rotationAreaInitialPos = new Vector2(70, 70);
-        private CollisionShape2D _check;
 
         protected float _rotationRadius;
         // protected CollisionShape2D _rotationRadiusShape;
-        public float targetRotationAngle { get; set; } = 0f;
-        private float _oldTargetRotationAngle = 0f;
+        public float RelevantRotationAngle { get; set; } = 0f;
+        private float _oldRelevantRotationAngle = 0f;
 
         public override void _Ready()
         {
@@ -31,8 +30,7 @@ namespace GameObjects
             _rotationArea.Position = _rotationAreaInitialPos;
             _rotationArea.Visible = false;
             _rotationRadius = _rotationAreaInitialPos.Length();
-            targetRotationAngle = GlobalRotation;
-            _check = GetNode<CollisionShape2D>("CheckingPos");
+            RelevantRotationAngle = GlobalRotation;
 
 
             // _rotationRadiusShape = GetNode<CollisionShape2D>("RotationAreaRadius2D/RotationRadiusShape");
@@ -54,29 +52,29 @@ namespace GameObjects
         {
             float lerpWeight = 0.4f;
 
-            targetRotationAngle = GlobalRotation + Mathf.LerpAngle(0, _rotationAreaInitialPos.AngleTo(positionToFollow), lerpWeight);
+            RelevantRotationAngle = GlobalRotation + Mathf.LerpAngle(0, _rotationAreaInitialPos.AngleTo(positionToFollow), lerpWeight);
         }
 
         public virtual void RotateObject()
         {
             float oldRotation = GlobalRotation;
-            //float _oldTargetRotationAngle = targetRotationAngle;
-            GlobalRotation = targetRotationAngle;
+            //float _oldRelevantRotationAngle = RelevantRotationAngle;
+            GlobalRotation = RelevantRotationAngle;
 
             KinematicCollision2D mainObjectCollision = MoveAndCollide(Vector2.Zero, testOnly: true);
             KinematicCollision2D rotationAreaCollision = _rotationArea.MoveAndCollide(Vector2.Zero, testOnly: true);
-            
+
             if (CheckRotationCollision(mainObjectCollision) || CheckRotationCollision(rotationAreaCollision))
             {
                 _rotationArea.Position = _rotationAreaInitialPos;
                 GlobalRotation = oldRotation;
             }
-            
+
         }
 
         public bool CheckRotationCollision(KinematicCollision2D collision)
         {
-             if (collision != null)
+            if (collision != null)
             {
                 collision.Dispose();
                 return true;
@@ -123,7 +121,8 @@ namespace GameObjects
                 if (mouseButtonEvent.IsActionReleased("select"))
                 {
                     _state = Globals.OBJECTSTATE.SELECTED;
-                    targetRotationAngle = GlobalRotation;
+                    s_someonePressed = false;
+                    RelevantRotationAngle = GlobalRotation;
 
                     if (!_imOnRotationArea)
                     {
@@ -184,7 +183,6 @@ namespace GameObjects
                     for (int i = 1; i <= 3; i++)
                     {
                         checkingPos = GlobalPosition + (checkingPos - GlobalPosition).Rotated(Mathf.Pi / 2);
-                        _check.GlobalPosition = checkingPos;
 
                         if (Globals.ScreenInfo.VisibleRect.HasPoint(checkingPos))
                         {
@@ -206,6 +204,7 @@ namespace GameObjects
                 if (mouseButtonEvent.IsActionReleased("select"))
                 {
                     _state = Globals.OBJECTSTATE.SELECTED;
+                    s_someonePressed = false;
 
                     mouseButtonEvent.Dispose();
                     return;
@@ -214,6 +213,7 @@ namespace GameObjects
                 if (mouseButtonEvent.IsActionPressed("select"))
                 {
                     _state = Globals.OBJECTSTATE.PRESSED;
+                    s_someonePressed = true;
 
                     _clickedRelativePosition = mouseButtonEvent.Position - GlobalPosition;
                     mouseButtonEvent.Dispose();
@@ -260,8 +260,8 @@ namespace GameObjects
             text += $"\nArea Local: {_rotationArea.Position}";
             text += $"\nArea Global: {_rotationArea.GlobalPosition}";
             text += $"\nHasPoint: {GetViewport().GetVisibleRect().HasPoint(_rotationArea.GlobalPosition)}";
-            text += $"\n CheckingPos: {_check.GlobalPosition}";
-            text += $"\n Angle:{Mathf.Rad2Deg(_check.Position.AngleTo(_rotationArea.Position))}";
+            // text += $"\n CheckingPos: {_check.GlobalPosition}";
+            // text += $"\n Angle:{Mathf.Rad2Deg(_check.Position.AngleTo(_rotationArea.Position))}";
 
             return text;
         }

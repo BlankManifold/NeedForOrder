@@ -1,14 +1,12 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://scripts/Objects/SpecificObjects/SquareObject.cs" type="Script" id=1]
-[ext_resource path="res://scenes/RotatableObject.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/BaseObjects/RotatableObject.tscn" type="PackedScene" id=2]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 50, 50 )
 
 [sub_resource type="CircleShape2D" id=2]
-
-[sub_resource type="CircleShape2D" id=3]
 
 [node name="SquareObject" instance=ExtResource( 2 )]
 script = ExtResource( 1 )
@@ -46,9 +44,11 @@ shape = SubResource( 2 )
 disabled = true
 
 [node name="Line2D" type="Line2D" parent="." index="4"]
+visible = false
 points = PoolVector2Array( 0, 0, 0, 0, 128, 0 )
 
 [node name="Label" type="Label" parent="Line2D" index="0"]
+visible = false
 margin_left = 96.0
 margin_top = 10.0
 margin_right = 104.0
@@ -60,9 +60,11 @@ __meta__ = {
 }
 
 [node name="Line2D2" type="Line2D" parent="." index="5"]
+visible = false
 points = PoolVector2Array( 0, 0, 0, 0, 0, 128 )
 
 [node name="Label" type="Label" parent="Line2D2" index="0"]
+visible = false
 margin_left = 10.0
 margin_top = 112.0
 margin_right = 17.0
@@ -71,8 +73,3 @@ text = "Y"
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="CheckingPos" type="CollisionShape2D" parent="." index="6"]
-position = Vector2( 0, 1 )
-shape = SubResource( 3 )
-disabled = true
