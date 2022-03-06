@@ -17,7 +17,7 @@ namespace Main
 
         private GameUI.GameUI _gameUI;
 
-        private Godot.Collections.Array<GameUI.ScrollButtonGameUI> _UIButtons;
+        private Godot.Collections.Array<GameUI.ScrollIconGameUI> _UIButtons;
 
         private bool _someoneWasPressed = false;
 
@@ -29,7 +29,7 @@ namespace Main
 
             // GetViewport().GuiDisableInput = true;   
             _gameUI = GetNode<GameUI.GameUI>("GameUILayer/GameUI");
-            _UIButtons = new Godot.Collections.Array<GameUI.ScrollButtonGameUI>(GetTree().GetNodesInGroup("UIButton"));
+            _UIButtons = new Godot.Collections.Array<GameUI.ScrollIconGameUI>(GetTree().GetNodesInGroup("UIButton"));
 
             PackedScene levelBarrierScene = (PackedScene)ResourceLoader.Load("res://scenes/BackgroundAndLevel/LevelBarrier.tscn");
             BackgroundAndLevel.LevelBarrier levelBarrier = levelBarrierScene.Instance<BackgroundAndLevel.LevelBarrier>();

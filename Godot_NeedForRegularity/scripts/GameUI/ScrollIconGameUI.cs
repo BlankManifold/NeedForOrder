@@ -2,7 +2,7 @@ using Godot;
 
 namespace GameUI
 {
-    public class ScrollButtonGameUI : TextureRect
+    public class ScrollIconGameUI : TextureRect
     {
         // private Color _focusedMo;
         private Color _notFocusedModulate;

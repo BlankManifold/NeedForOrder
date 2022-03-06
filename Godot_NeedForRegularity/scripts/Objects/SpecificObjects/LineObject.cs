@@ -58,7 +58,7 @@ namespace GameObjects
         }
         public override void setupFollowMouse(Vector2 relativeMotion)
         {
-            RelevantPosition = _coefficients + relativeMotion - _clickedRelativePosition;
+            RelevantPosition = _coefficients + relativeMotion;
         }
 
         public override void MoveObject(float delta)
@@ -72,8 +72,8 @@ namespace GameObjects
         
 
             Vector2 oldCoefficient = _coefficients;
-            Vector2 direction = RelevantPosition.Normalized();//_coefficients.DirectionTo(RelevantPosition);
-            float speed = RelevantPosition.Length();//_coefficients.DistanceTo(RelevantPosition);
+            Vector2 direction = _coefficients.DirectionTo(RelevantPosition);
+            float speed = _coefficients.DistanceTo(RelevantPosition);
 
             _coefficients += direction*speed;  
 
@@ -88,7 +88,7 @@ namespace GameObjects
             }
 
             _coefficients = oldCoefficient;
-            RelevantPosition = _coefficients -  _clickedRelativePosition;
+            RelevantPosition = _coefficients;
 
             UpdateIntersectionPoints();
             UpdateShape();
@@ -154,7 +154,7 @@ namespace GameObjects
                     _state = Globals.OBJECTSTATE.PRESSED;
                     s_someonePressed = true;
 
-                    _clickedRelativePosition = _coefficients;
+                    // _clickedRelativePosition = _coefficients;
                     mouseButtonEvent.Dispose();
                     return;
                 }

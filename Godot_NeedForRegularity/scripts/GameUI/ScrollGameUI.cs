@@ -5,8 +5,8 @@ namespace GameUI
 {
     public class ScrollGameUI : CenterContainer
     {
-        private List<ScrollButtonGameUI> _buttons = new List<ScrollButtonGameUI>() { };
-        protected ScrollButtonGameUI _focusedButton;
+        private List<ScrollIconGameUI> _buttons = new List<ScrollIconGameUI>() { };
+        protected ScrollIconGameUI _focusedButton;
         private HBoxContainer _hbox;
 
         private bool _pressed = false;
@@ -26,7 +26,7 @@ namespace GameUI
 
             _hbox = GetNode<HBoxContainer>("CenterContainer/HBoxContainer");
 
-            foreach (ScrollButtonGameUI button in _hbox.GetChildren())
+            foreach (ScrollIconGameUI button in _hbox.GetChildren())
             {
                 _buttons.Add(button);
             }
@@ -38,7 +38,7 @@ namespace GameUI
             _focusedButton.SetInitialValue(focused: true);
         }
 
-        private async void UpdateFocus(ScrollButtonGameUI newFocusedButton)
+        private async void UpdateFocus(ScrollIconGameUI newFocusedButton)
         {
             SetUpFocusingTweenButtons(newFocusedButton);
             SetUpFocusingTweenHBox(newFocusedButton);
@@ -49,7 +49,7 @@ namespace GameUI
             await ToSignal(this, nameof(FocusingTweenCompleted));
         }
 
-        private void SetUpFocusingTweenButtons(ScrollButtonGameUI newFocusedButton)
+        private void SetUpFocusingTweenButtons(ScrollIconGameUI newFocusedButton)
         {
             _focusingTween.InterpolateProperty(_focusedButton, "modulate", _focusedButton.FocusedModulate, _focusedButton.NotFocusedModulate, _tweenSpeed);
             _focusingTween.InterpolateProperty(_focusedButton, "rect_scale", _focusedButton.FocusedScale, _focusedButton.NotFocusedScale, _tweenSpeed);
@@ -58,7 +58,7 @@ namespace GameUI
             _focusingTween.InterpolateProperty(newFocusedButton, "rect_scale", newFocusedButton.NotFocusedScale, newFocusedButton.FocusedScale, _tweenSpeed);
 
         }
-        private void SetUpFocusingTweenHBox(ScrollButtonGameUI newFocusedButton)
+        private void SetUpFocusingTweenHBox(ScrollIconGameUI newFocusedButton)
         {
             float deltaX = newFocusedButton.RectPosition.x - _focusedButton.RectPosition.x;
             float oldXPos = _hbox.RectPosition.x;
