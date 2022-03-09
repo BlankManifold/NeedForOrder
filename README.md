@@ -40,7 +40,7 @@ and (maybe?) save the configurations you created. You can also choose to use a b
 * Create `RotatableObject` node: inherited scene of `BaseObject` with a second `KinematicBody2D` to be pressed to control the rotation → calls `GetOverlappingBodies()`
   in the selection/unselection input-handler function and returns the object on top
 * Created `RotatableObject` as child of `BaseObject` and as `IRotatable`: implemented the `InputControlFlow` function to handle motion/rotation → basically 
-  I recreated the selection/unselection/move/rotate functionalities of Godot's editor (or any 2d design software) but with the challening interactions beetwen objects's 
+  I recreated the selection/unselection/move/rotate functionalities of Godot's editor (or any 2d design software) but with the challenging interactions beetwen objects's 
   motion/rotation and `LevelBarriers` constraints
 * Implemented a `_overlapple` variable for the objects (modifies with code the collision layer/mask)
 * Created nodes and implemented classes of: `SquareObject`, `DotObject`, `DiskObject`  
@@ -52,7 +52,15 @@ and (maybe?) save the configurations you created. You can also choose to use a b
 * Created and implemented `ScrollObjectType` (as child of `ScrollGameUI`) and `ScrollIconGameUI`: change type of object, press and drag left/right the icons of the scrollbar (I did not use `ScrollContainer` or similar), use tween to change Modulate and scale of selected/unselected icons, emit `ChangedObjectType` signal to `Main`
 * `GameUI` input are handled by `_input_event` signal of the `Area2D` specific to a `ScrollGameUI`
 * Added `PlayableSize` in `Globals.ScreenInfo` struct: `GameUI` limits the playable size (from `GetViewport().VisibleSize` to `PlayableSize`)
-* Created `LineObject` scene: child of `RotatableObject` with a `Line2D`, `LineObject` is defined by the angular coefficient `_m`, x-axis intersection `_x0` and y-axis intersection `_b`
+* Created `LineObject` scene: child of `RotatableObject` with a `Line2D`, `LineObject` is defined by the angular coefficient `_m` ($m$), x-axis intersection `_x0` ($x_0$) and y-axis intersection `_b` ($b$)
 * Implemented `LineObject` random initialization and selection area collsion: choose random `_m`, `_x0` and `_b`, calculate the two intesection points of this line with `Globals.PlayableSize` and set this points as `Line2D.Points`, store the center point of the line and update the `SelectionAreaShape` shape
 * `LineObject` has a specific `CollisionLayer` → it did NOT interact directly with `CollisionLayer` of `LevelBarriers`; the center point of the line is contrainted to be in the `PlayableSize`
-* `LineObject` motion: mouse movement is related to movement in the (`_x0`, `_b`) parameter-space, the main `KinematicBody2D` does not move, movement is in the (`_x0`, `_b`) parameter-space and update line points (intersection points with playable area) every frame (a mouse movement along the x-axis changes `_x0`, along the y-axis changes `_b`)
+* `LineObject` motion: mouse movement is related to movement in the $(x_0, b)$ parameter-space, the main `KinematicBody2D` does not move, movement is in the  $(x_0, b)$ parameter-space and update line points (intersection points with playable area) every frame (a mouse movement along the x-axis changes `_x0`, along the y-axis changes `_b`)
+
+
+## 06/03/2022
+* Implemented `LineObject` rotation: similar to motion, rotation takes place on the `_m` parameter; before the rotation setup the rotation center: it is the current line center (respect the intersection points) → so set $(x_0,b)$ equals to the center point (does not change the line and put the center rotation in the correct position)
+* Implemented rotation snapping in `RotatableObject` (to default snaps every 45° with a delta-angle threshold 3°): smooth rotation unless $|TargetAngle - MultipleOfSnappingAngle| < DeltaAngleThreshold$
+* Refactored some code/inheritance structure in/of `RotationObject`, `LineObject`, `BaseObject`: create some general function (like `InputRotationPressed`, `InputMovementMotion`...) to be called in the `HandleInputMotion` and `HandleInputRotation` function → reduced copy and paste code and makes motion/rotation more general
+* Created `ScrollNumber` and `ScrollNumberIconGameUI` and connected to `Main`: scroll UI that can change number of objects spawned
+* Adeed `ScrollNumber` to the main UI node `GameUI`

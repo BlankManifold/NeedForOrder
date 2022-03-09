@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://scenes/GameUI/ScrollObjectType.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scripts/GameUI/GameUI.cs" type="Script" id=2]
+[ext_resource path="res://scenes/GameUI/ScrollNumber.tscn" type="PackedScene" id=3]
 
 [node name="GameUI" type="Control"]
 anchor_left = 0.5
@@ -9,7 +10,7 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 margin_left = -360.0
-margin_top = -190.0
+margin_top = -108.0
 margin_right = 360.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -27,8 +28,13 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="ScrollNumber" parent="NinePatchRect" instance=ExtResource( 3 )]
+margin_left = 59.0
+margin_top = -102.0
+margin_right = 359.0
+margin_bottom = -2.0
+
 [node name="ScrollObjectType" parent="NinePatchRect" instance=ExtResource( 1 )]
-margin_left = -359.5
-margin_top = -187.0
-margin_right = 359.5
-margin_bottom = 0.0
+margin_left = -358.0
+margin_top = -101.0
+margin_right = -58.0

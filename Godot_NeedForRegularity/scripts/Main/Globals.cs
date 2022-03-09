@@ -13,7 +13,7 @@ namespace Globals
     }
     public enum OBJECTTYPE
     {
-        DOT, SQUARE, LINE, CIRCLE
+        DOT, SQUARE, LINE, CIRCLE, NOTAOBJECT
     }
 
     public struct ScreenInfo

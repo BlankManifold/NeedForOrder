@@ -60,7 +60,7 @@ namespace GameUI
         }
         private void SetUpFocusingTweenHBox(ScrollIconGameUI newFocusedButton)
         {
-            float deltaX = newFocusedButton.RectPosition.x - _focusedButton.RectPosition.x;
+            float deltaX = (newFocusedButton.RectPosition.x - _focusedButton.RectPosition.x)*_hbox.RectScale.x;
             float oldXPos = _hbox.RectPosition.x;
             float newXPos = oldXPos - deltaX;
             _focusingTween.InterpolateProperty(_hbox, "rect_position:x", oldXPos, newXPos, _tweenSpeed);

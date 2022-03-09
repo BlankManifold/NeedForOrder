@@ -15,11 +15,15 @@ namespace GameObjects
         private int _width = 4;
         private float _angleDegrees;
 
-        private Vector2 _lineCenter;
-        private Vector2 _oldMousePosition;
+        private Position2D _lineCenterNode;
+        private Vector2 _oldLineCenterPos;
 
         private Line2D _line;
         private CollisionShape2D _selectionAreaShape;
+
+        private float _delta;
+        
+
 
         public override void InitRandomObject()
         {
@@ -27,18 +31,19 @@ namespace GameObjects
             int positionX = Globals.RandomManager.rng.RandiRange(offset, (int)Globals.ScreenInfo.PlayableSize[0] - offset);
             int positionY = Globals.RandomManager.rng.RandiRange(offset, (int)Globals.ScreenInfo.PlayableSize[1] - offset);
 
-            _angleDegrees = Globals.RandomManager.rng.RandfRange(-89, 89);
+            _angleDegrees = Globals.RandomManager.rng.RandfRange(-Mathf.Pi / 2, Mathf.Pi / 2);
 
             // GlobalPosition = new Vector2(positionX, positionY);
             // GlobalRotationDegrees = angleDegrees;
 
-            
+
             _coefficients.x = positionX;
             _coefficients.y = positionY;
-            _m = Mathf.Tan(Mathf.Deg2Rad(_angleDegrees));
+            _m = Mathf.Tan(_angleDegrees);
             RelevantPosition = Vector2.Zero;
 
         }
+
 
         public override void _Ready()
         {
@@ -48,41 +53,46 @@ namespace GameObjects
 
             _line = GetNode<Line2D>("Line2D");
             _selectionAreaShape = GetNode<CollisionShape2D>("SelectionAreaShape");
-            UpdateIntersectionPoints();
-            UpdateShape();
+            _selectionAreaShape.Shape = (RectangleShape2D)_selectionAreaShape.Shape.Duplicate();
 
-            _oldMousePosition = Vector2.Zero;
+            _lineCenterNode = GetNode<Position2D>("LineCenter");
+            UpdateAll();
 
-            RectangleShape2D shape = (RectangleShape2D)_selectionAreaShape.Shape;
-            shape.Extents = new Vector2(shape.Extents.x, Globals.ScreenInfo.PlayableSize.Length());
+            RelevantRotationAngle = _angleDegrees;
+
         }
-        public override void setupFollowMouse(Vector2 relativeMotion)
+        public override void _Process(float delta)
         {
-            RelevantPosition = _coefficients + relativeMotion;
+            base._Process(delta);
+
+            if (_state >= Globals.OBJECTSTATE.SELECTED)
+                _line.DefaultColor = new Color(0, 0, 0);
+
+            else
+                _line.DefaultColor = new Color(1, 1, 1);
+
+            if (_imOnRotationArea)
+                _rotationArea.Modulate = new Color(0, 0, 0);
+            else
+                _rotationArea.Modulate = new Color(1, 1, 1);
+
         }
+
+
 
         public override void MoveObject(float delta)
         {
-            //Vector2 direction = (GlobalPosition).DirectionTo(RelevantPosition);
-            //float speed = RelevantPosition.DistanceTo(GlobalPosition) * _quickness;
-
-            //Vector2 linearVelocity = direction * speed;
-
-            // MoveAndSlide(linearVelocity);
-        
-
             Vector2 oldCoefficient = _coefficients;
             Vector2 direction = _coefficients.DirectionTo(RelevantPosition);
             float speed = _coefficients.DistanceTo(RelevantPosition);
 
-            _coefficients += direction*speed;  
+            _coefficients += direction * speed;
 
-            UpdateIntersectionPoints();
-            UpdateShape();
+            UpdateAll();
 
             int offset = 10;
-            if (offset < _lineCenter.x && _lineCenter.x < Globals.ScreenInfo.PlayableSize.x - offset &&
-                offset < _lineCenter.y && _lineCenter.y < Globals.ScreenInfo.PlayableSize.y - offset)
+            if (offset < _lineCenterNode.GlobalPosition.x && _lineCenterNode.GlobalPosition.x < Globals.ScreenInfo.PlayableSize.x - offset &&
+                offset < _lineCenterNode.GlobalPosition.y && _lineCenterNode.GlobalPosition.y < Globals.ScreenInfo.PlayableSize.y - offset)
             {
                 return;
             }
@@ -90,147 +100,89 @@ namespace GameObjects
             _coefficients = oldCoefficient;
             RelevantPosition = _coefficients;
 
-            UpdateIntersectionPoints();
-            UpdateShape();
-
-            // float x = Mathf.Clamp(RelevantPosition.x,0,Globals.ScreenInfo.VisibleRectSize.x);
-            // float y = Mathf.Clamp(RelevantPosition.y,0,Globals.ScreenInfo.VisibleRectSize.y);
-            // GlobalPosition = new Vector2(x,y);
-
+            UpdateAll();
         }
-
-        public override void HandleMotionInput(InputEvent @event)
+        public override void RotateObject()
         {
-            if (@event is InputEventMouseMotion mouseMotion && IsInstanceValid(@event) && _state != Globals.OBJECTSTATE.SELECTED)
+            float oldRotation = _angleDegrees;
+            _angleDegrees = RelevantRotationAngle;
+
+            KinematicCollision2D rotationAreaCollision = _rotationArea.MoveAndCollide(Vector2.Zero, testOnly: true);
+
+            if (CheckRotationCollision(rotationAreaCollision))
             {
-                if (_state == Globals.OBJECTSTATE.PRESSED)
-                {
-                    _state = Globals.OBJECTSTATE.MOVING;
-                }
-
-                setupFollowMouse(mouseMotion.Relative);
-                // _oldMousePosition = mouseMotion.Position;
-
-                // KinematicCollision2D collisionInfo = _rotationArea.MoveAndCollide(Vector2.Zero, testOnly: true);
-
-                // if (collisionInfo != null)
-                // {
-                //     collisionInfo.Dispose();
-                //     Vector2 intialDirection = GlobalPosition.DirectionTo(_rotationArea.GlobalPosition);
-                //     Vector2 dilatetedPos = _rotationArea.GlobalPosition + intialDirection * 20f;
-                //     Vector2 checkingPos = dilatetedPos;
-                //     for (int i = 1; i <= 3; i++)
-                //     {
-                //         checkingPos = GlobalPosition + (checkingPos - GlobalPosition).Rotated(Mathf.Pi / 2);
-
-                //         if (Globals.ScreenInfo.VisibleRect.HasPoint(checkingPos))
-                //         {
-                //             _rotationArea.GlobalPosition = GlobalPosition + GlobalPosition.DirectionTo(checkingPos) * _rotationRadius;
-                //             _rotationAreaInitialPos = _rotationArea.Position;
-                //             break;
-                //         }
-
-                //     }
-                // }
-
-                @event.Dispose();
+                _rotationArea.GlobalPosition = _oldLineCenterPos + _rotationAreaInitialPos;
+                _angleDegrees = oldRotation;
                 return;
             }
 
-
-            if (@event is InputEventMouseButton mouseButtonEvent && IsInstanceValid(@event))
-            {
-                if (mouseButtonEvent.IsActionReleased("select"))
-                {
-                    _state = Globals.OBJECTSTATE.SELECTED;
-                    s_someonePressed = false;
-
-                    mouseButtonEvent.Dispose();
-                    return;
-                }
-
-                if (mouseButtonEvent.IsActionPressed("select"))
-                {
-                    _state = Globals.OBJECTSTATE.PRESSED;
-                    s_someonePressed = true;
-
-                    // _clickedRelativePosition = _coefficients;
-                    mouseButtonEvent.Dispose();
-                    return;
-                }
-            }
-
+            _m = Mathf.Tan(_angleDegrees);
+            UpdateIntersectionPoints();
+            UpdateShape();
         }
 
-        // private void CheckIsInbound(float x0, float b, float m)
-        // {
-        //     //int offset = 5;
-        //     int maxX = (int)Globals.ScreenInfo.PlayableSize.x; //+ offset;
-        //     int maxY = (int)Globals.ScreenInfo.PlayableSize.y;//+ offset;
-        //     int minX = 0;//-offset
-        //     int minY = 0;//-offset;
 
-        //     float xTop = (maxY - b) / m + x0;
-        //     float xBottom = (minY - b) / m + x0;
-        //     float yRight = m * (maxX - _coefficients.x) + b;
-        //     float yLeft = m * (minX - _coefficients.x) + b;
 
-        //     int cont = 0;
+        protected override void setupFollowMouse(Vector2 relativeMotion)
+        {
+            RelevantPosition = _coefficients + relativeMotion;
+        }
+        protected override void SetUpRotation(Vector2 positionToFollow)
+        {
+            float lerpWeight = 0.4f;
 
-        //     if (m > 0)
-        //     {
-        //         if (xTop <= maxX)
-        //         {
-        //             cont++;
-        //         }
-        //         else
-        //         {
-        //             cont++;
-        //         }
+            Vector2 referencePos = _rotationArea.GlobalPosition - _oldLineCenterPos;
+            Vector2 currentPos = positionToFollow - _oldLineCenterPos;
+            float deltaAngle = Mathf.LerpAngle(0, referencePos.AngleTo(currentPos), lerpWeight);
 
-        //         if (xBottom >= 0)
-        //         {
-        //             cont++;
-        //         }
-        //         else
-        //         {
-        //             cont++;
-        //         }
+            _delta = deltaAngle;
 
-        //         UpdateShape();
+            Vector2 oldRotationAreaPosition = _rotationArea.GlobalPosition;
+            _rotationArea.GlobalPosition = _oldLineCenterPos + referencePos.Rotated(deltaAngle);
 
-        //         return;
-        //     }
+            KinematicCollision2D rotationAreaCollision = _rotationArea.MoveAndCollide(Vector2.Zero, testOnly: true);
+            if (CheckRotationCollision(rotationAreaCollision))
+            {
+                _rotationArea.GlobalPosition = oldRotationAreaPosition;
+                deltaAngle = 0f;
+            }
 
-        //     if (m < 0)
-        //     {
-        //         if (xTop >= 0)
-        //         {
-        //             _line.SetPointPosition(0, new Vector2(xTop, maxY));
-        //             //set Point (xTop,maxY)
-        //         }
-        //         else
-        //         {
-        //             _line.SetPointPosition(0, new Vector2(minX, yLeft));
-        //             // set Point (0, yLeft)
-        //         }
+            RelevantRotationAngle = (_angleDegrees + deltaAngle) % (2 * Mathf.Pi);
 
-        //         if (xBottom <= maxX)
-        //         {
-        //             _line.SetPointPosition(1, new Vector2(xBottom, minY));
-        //             //set Point (xBottom,0)
-        //         }
-        //         else
-        //         {
-        //             _line.SetPointPosition(1, new Vector2(maxX, yRight));
-        //             // set Point (maxX, yRight)
-        //         }
+            if (_rotationSnappable)
+            {
+                if (SetUpRotationSnappping())
+                {
+                    _rotationArea.GlobalPosition = oldRotationAreaPosition;
+                }
+            }
+        }
+        private void SetUpCoefficientsForRotation()
+        {
+            _coefficients = _oldLineCenterPos;
+        }
 
-        //        UpdateShape();
 
-        //         return;
-        //     }
-        // }
+
+        protected override void InputRotationPressed()
+        {
+
+            _oldLineCenterPos = _lineCenterNode.GlobalPosition;
+            SetUpCoefficientsForRotation();
+
+        }
+        protected override void InputRotationReleased()
+        {
+            RelevantRotationAngle = _angleDegrees;
+        }
+        protected override void InputMovementMotion(InputEventMouseMotion mouseMotion)
+        {
+            setupFollowMouse(mouseMotion.Relative);
+            UpdateRotationAreaInitialPos(_lineCenterNode.GlobalPosition);
+        }
+        protected override void InputMovementPressed(InputEventMouseButton _) { }
+
+
 
         private void UpdateIntersectionPoints()
         {
@@ -251,26 +203,20 @@ namespace GameObjects
                 if (xTop <= maxX)
                 {
                     _line.SetPointPosition(0, new Vector2(xTop, maxY));
-                    //set Point (xTop,maxY)
                 }
                 else
                 {
                     _line.SetPointPosition(0, new Vector2(maxX, yRight));
-                    // set Point (maxX, yRight)
                 }
 
                 if (xBottom >= 0)
                 {
                     _line.SetPointPosition(1, new Vector2(xBottom, minY));
-                    //set Point (xBottom,0)
                 }
                 else
                 {
                     _line.SetPointPosition(1, new Vector2(minX, yLeft));
-                    // set Point (0, yLeft)
                 }
-
-                //UpdateShape();
 
                 return;
             }
@@ -280,37 +226,74 @@ namespace GameObjects
                 if (xTop >= 0)
                 {
                     _line.SetPointPosition(0, new Vector2(xTop, maxY));
-                    //set Point (xTop,maxY)
                 }
                 else
                 {
                     _line.SetPointPosition(0, new Vector2(minX, yLeft));
-                    // set Point (0, yLeft)
                 }
 
                 if (xBottom <= maxX)
                 {
                     _line.SetPointPosition(1, new Vector2(xBottom, minY));
-                    //set Point (xBottom,0)
                 }
                 else
                 {
                     _line.SetPointPosition(1, new Vector2(maxX, yRight));
-                    // set Point (maxX, yRight)
                 }
 
-                //UpdateShape();
+                return;
+            }
+
+            if (_m == 0)
+            {
+                _line.SetPointPosition(0, new Vector2(minX, yLeft));
+                _line.SetPointPosition(1, new Vector2(maxX, yRight));
 
                 return;
             }
         }
-
         private void UpdateShape()
         {
-            _lineCenter = (_line.Points[1] + _line.Points[0]) / 2;
-            _selectionAreaShape.GlobalPosition = _lineCenter;
-            _selectionAreaShape.GlobalRotationDegrees = 90 + _angleDegrees;
+            _lineCenterNode.GlobalPosition = (_line.Points[1] + _line.Points[0]) / 2;
+            _selectionAreaShape.GlobalPosition = _lineCenterNode.GlobalPosition;
+            _selectionAreaShape.GlobalRotation = Mathf.Pi / 2 + _angleDegrees;
 
+            RectangleShape2D shape = (RectangleShape2D)_selectionAreaShape.Shape;
+            shape.Extents = new Vector2(shape.Extents.x, _lineCenterNode.GlobalPosition.DistanceTo(_line.Points[0]));
+
+        }
+        private void UpdateRotationArea()
+        {
+            _rotationArea.GlobalPosition = _lineCenterNode.GlobalPosition + _rotationAreaInitialPos;
+        }
+        private void UpdateAll()
+        {
+            UpdateIntersectionPoints();
+            UpdateShape();
+            UpdateRotationArea();
+        }
+
+
+
+        public override string InfoString()
+        {
+            string text = $"STATE: {_state} \nSelectable: {s_selectable}";
+            text = $"\nInRotationArea: {_imOnRotationArea}\nRotatable: {_rotatable}";
+            text += $"\nSize: {GetViewport().GetVisibleRect().Size}";
+            text += $"\nRotation: {GlobalRotationDegrees}";
+            text += $"\nGlobal: {GlobalPosition}";
+            text += $"\nArea Local: {_rotationArea.Position}";
+            text += $"\nArea Global: {_rotationArea.GlobalPosition}";
+            text += $"\nHasPoint: {GetViewport().GetVisibleRect().HasPoint(_rotationArea.GlobalPosition)}";
+            text += $"\n AngleDegrees: {_angleDegrees}";
+            text += $"\n _m: {_m}";
+            text += $"\n _delta: {_delta}";
+            text += $"\n RelativePos: {GetLocalMousePosition() - _oldLineCenterPos}";
+            text += $"\n CurrentPivot:  {_oldLineCenterPos}";
+            text += $"\n CurrentCenter:  {_lineCenterNode.GlobalPosition}";
+            // text += $"\n Angle:{Mathf.Rad2Deg(_check.Position.AngleTo(_rotationArea.Position))}";
+
+            return text;
         }
 
     }

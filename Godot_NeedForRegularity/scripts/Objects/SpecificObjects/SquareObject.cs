@@ -4,7 +4,7 @@ using Godot;
 namespace GameObjects
 
 {
-    public class SquareObject : RotatableObject, IScalable
+    public class SquareObject : RotatableObject
     {
         [Export(PropertyHint.Range, "0,100")]
         private int _lenght = 50;
@@ -44,7 +44,7 @@ namespace GameObjects
         {
             base._Ready();
             _colorRect = GetNode<ColorRect>("ColorRect");
-             _colorRect.RectSize = new Vector2(_lenght, _lenght);
+            _colorRect.RectSize = new Vector2(_lenght, _lenght);
         }
 
 
@@ -63,12 +63,6 @@ namespace GameObjects
             else
                 _rotationArea.Modulate = new Color(1, 1, 1);
 
-        }
-
-        public void ScaleObject(float scale)
-        {
-            int newLenght = (int)(_standardLenght * scale);
-            _lenght = newLenght;
         }
 
     }

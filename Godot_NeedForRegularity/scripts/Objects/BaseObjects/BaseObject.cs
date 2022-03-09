@@ -10,20 +10,13 @@ namespace GameObjects
         [Export]
         protected bool _overlappaple = true;
 
-        protected Vector2 _clickedRelativePosition;
-        public Vector2 ClickedRelativePosition
-        {
-            get { return _clickedRelativePosition; }
-            set { _clickedRelativePosition = value; }
-        }
 
         public static bool s_selectable = true;
         public static bool s_someonePressed = false;
         public static BaseObject s_selectedObject = null;
         public static BaseObject s_hoveredObject = null;
 
-      
-       
+
         public Vector2 RelevantPosition { get; set; }
         protected Globals.OBJECTSTATE _state;
         public Globals.OBJECTSTATE State
@@ -32,7 +25,9 @@ namespace GameObjects
             set { _state = value; }
         }
 
-        private Node2D _main;
+
+        protected Vector2 _clickedRelativePosition;
+        
 
         [Signal]
         public delegate void UpdateSelection(bool eliminateOldSelection);
@@ -50,16 +45,7 @@ namespace GameObjects
             GlobalPosition = new Vector2(positionX, positionY);
         }
 
-        // public override void _Process(float delta)
-        // {
-        //     if (_state >= Globals.OBJECTSTATE.SELECTED)
-        //         Modulate = new Color(0, 0, 0);
-        //     else
-        //         Modulate = new Color(1, 1, 1);
-
-        //     if (s_hoveredObject == this && _state < Globals.OBJECTSTATE.SELECTED)
-        //         Modulate = new Color(1, 0, 0);
-        // }
+       
 
         public override void _Ready()
         {
@@ -72,6 +58,8 @@ namespace GameObjects
             }
 
         }
+
+
 
         public virtual void InputControlFlow(InputEvent @event)
         {
@@ -90,7 +78,59 @@ namespace GameObjects
                 return;
             }
         }
+        protected virtual void HandleMotionInput(InputEvent @event)
+        {
+            if (@event is InputEventMouseMotion mouseMotion && IsInstanceValid(@event) && _state != Globals.OBJECTSTATE.SELECTED)
+            {
+                if (_state == Globals.OBJECTSTATE.PRESSED)
+                {
+                    _state = Globals.OBJECTSTATE.MOVING;
+                }
 
+                InputMovementMotion(mouseMotion);
+
+                @event.Dispose();
+                return;
+            }
+
+
+            if (@event is InputEventMouseButton mouseButtonEvent && IsInstanceValid(@event))
+            {
+                if (mouseButtonEvent.IsActionReleased("select"))
+                {
+                    _state = Globals.OBJECTSTATE.SELECTED;
+                    s_someonePressed = false;
+
+                    InputMovementReleased();
+
+                    mouseButtonEvent.Dispose();
+                    return;
+                }
+
+                if (mouseButtonEvent.IsActionPressed("select"))
+                {
+                    _state = Globals.OBJECTSTATE.PRESSED;
+                    s_someonePressed = true;
+
+                    InputMovementPressed(mouseButtonEvent);
+                    mouseButtonEvent.Dispose();
+                    return;
+                }
+            }
+
+        }
+        protected virtual void InputMovementMotion(InputEventMouseMotion mouseMotion)
+        {
+            setupFollowMouse(mouseMotion.Position);
+        }
+        protected virtual void InputMovementPressed(InputEventMouseButton mouseButtonEvent)
+        {
+            _clickedRelativePosition = mouseButtonEvent.Position - GlobalPosition;
+        }
+        protected virtual void InputMovementReleased() { }
+        
+        
+        
         public virtual void SelectObject()
         {
             _state = Globals.OBJECTSTATE.PRESSED;
@@ -111,51 +151,15 @@ namespace GameObjects
 
         }
 
-        public virtual void setupFollowMouse(Vector2 followPosition)
+        
+        
+        protected virtual void setupFollowMouse(Vector2 followPosition)
         {
             RelevantPosition = followPosition - _clickedRelativePosition;
         }
 
-        public virtual void HandleMotionInput(InputEvent @event)
-        {
-            if (@event is InputEventMouseMotion mouseMotion && IsInstanceValid(@event) && _state != Globals.OBJECTSTATE.SELECTED)
-            {
-                if (_state == Globals.OBJECTSTATE.PRESSED)
-                {
-                    _state = Globals.OBJECTSTATE.MOVING;
-                }
-
-                setupFollowMouse(mouseMotion.Position);
-
-                @event.Dispose();
-                return;
-            }
-
-
-            if (@event is InputEventMouseButton mouseButtonEvent && IsInstanceValid(@event))
-            {
-                if (mouseButtonEvent.IsActionReleased("select"))
-                {
-                    _state = Globals.OBJECTSTATE.SELECTED;
-                    s_someonePressed = false;
-
-                    mouseButtonEvent.Dispose();
-                    return;
-                }
-
-                if (mouseButtonEvent.IsActionPressed("select"))
-                {
-                    _state = Globals.OBJECTSTATE.PRESSED;
-                    s_someonePressed = true;
-
-                    _clickedRelativePosition = mouseButtonEvent.Position - GlobalPosition;
-                    mouseButtonEvent.Dispose();
-                    return;
-                }
-            }
-
-        }
-
+        
+       
         public virtual string InfoString()
         {
             string text =  $"STATE: {_state}\n Selectable: {s_selectable}";

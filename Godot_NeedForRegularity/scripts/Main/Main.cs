@@ -10,18 +10,14 @@ namespace Main
         private GAMESTATE _gamestate = GAMESTATE.IDLE;
         private OBJECTTYPE _objectType = OBJECTTYPE.SQUARE;
         private uint _objectsNumber = 3;
+       
         private Node _objectsContainer;
-
         private Area2D _mouseArea;
         private Label _label;
-
         private GameUI.GameUI _gameUI;
-
         private Godot.Collections.Array<GameUI.ScrollIconGameUI> _UIButtons;
 
-        private bool _someoneWasPressed = false;
-
-
+    
 
         public override void _Ready()
         {
@@ -50,7 +46,7 @@ namespace Main
         {
             UpdateState();
             UpdateMouseAreaPosition(GetGlobalMousePosition());
-            // UpdateMouseFilterUI();
+            
             
             if (BaseObject.s_selectedObject != null)
             {
@@ -59,42 +55,21 @@ namespace Main
 
             switch (_gamestate)
             {
+                
                 case GAMESTATE.MOVING:
                     BaseObject.s_selectedObject.MoveObject(delta);
                     break;
+
                 case GAMESTATE.ROTATING:
                     RotatableObject castedObject = (RotatableObject)BaseObject.s_selectedObject;
                     castedObject.RotateObject();
                     break;
+
                 case GAMESTATE.IDLE:
                     break;
 
             }
         }
-
-        public BaseObject ReturnTopObject()
-        {
-            Godot.Collections.Array<BaseObject> objects = new Godot.Collections.Array<BaseObject>(_mouseArea.GetOverlappingBodies());
-
-            int maxIndex = -1;
-
-            if (objects.Count > 0)
-            {
-                int topIndex = -1;
-                for (int i = 0; i < objects.Count; i++)
-                {
-                    int index = objects[i].GetIndex();
-                    if (index > maxIndex)
-                    {
-                        maxIndex = index;
-                        topIndex = i;
-                    }
-                }
-                return objects[topIndex];
-            }
-            return null;
-        }
-
         public override void _UnhandledInput(InputEvent @event)
         {
 
@@ -121,6 +96,30 @@ namespace Main
             @event.Dispose();
         }
 
+
+
+        private BaseObject ReturnTopObject()
+        {
+            Godot.Collections.Array<BaseObject> objects = new Godot.Collections.Array<BaseObject>(_mouseArea.GetOverlappingBodies());
+
+            int maxIndex = -1;
+
+            if (objects.Count > 0)
+            {
+                int topIndex = -1;
+                for (int i = 0; i < objects.Count; i++)
+                {
+                    int index = objects[i].GetIndex();
+                    if (index > maxIndex)
+                    {
+                        maxIndex = index;
+                        topIndex = i;
+                    }
+                }
+                return objects[topIndex];
+            }
+            return null;
+        }
         private void SpawnObjects()
         {
             string objectType;
@@ -159,6 +158,9 @@ namespace Main
 
 
         }
+       
+
+
         private void UpdateState()
         {
             if (BaseObject.s_selectedObject != null)
@@ -181,7 +183,6 @@ namespace Main
 
             _gamestate = GAMESTATE.IDLE;
         }
-
         private void UpdateHoveredAndSelectedObject()
         {
 
@@ -232,22 +233,8 @@ namespace Main
             _mouseArea.GlobalPosition = new Vector2(x,y);
         }
 
-        // private void UpdateMouseFilterUI()
-        // {
-        //     if (BaseObject.s_someonePressed && !_someoneWasPressed)
-        //     {
-        //         _someoneWasPressed = true;
-        //         // GetViewport().GuiDisableInput = true;
-        //     }
 
-        //     if (!BaseObject.s_someonePressed && _someoneWasPressed)
-        //     {
-        //         _someoneWasPressed = false;
-        //         // GetViewport().GuiDisableInput = false;
 
-        //     }
-
-        // }
 
         public void _on_ScrollGameUI_ObjectTypeChanged(OBJECTTYPE type)
         {
@@ -257,6 +244,18 @@ namespace Main
             }
             _gamestate = GAMESTATE.IDLE;
             _objectType = type;
+            
+            SpawnObjects(); 
+        }
+        public void _on_ScrollGameUI_NumberChanged(uint newNumber)
+        {
+
+            foreach (Node child in _objectsContainer.GetChildren())
+            {
+                child.QueueFree();                
+            }
+            _gamestate = GAMESTATE.IDLE;
+            _objectsNumber = newNumber;
             
             SpawnObjects(); 
         }
