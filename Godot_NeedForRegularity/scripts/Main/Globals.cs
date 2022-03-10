@@ -11,6 +11,36 @@ namespace Globals
     {
         UNSELECTED, SELECTED, PRESSED, MOVING, ROTATING, SCALING
     }
+
+    public static class Utilities
+    {
+
+        public static string ObjectTypeToString(OBJECTTYPE type)
+        {
+            switch (type)
+            {
+                case OBJECTTYPE.SQUARE:
+                    return "SquareObject";
+
+                case OBJECTTYPE.DOT:
+                    return "DotObject";
+
+                case OBJECTTYPE.CIRCLE:
+                    return "CircleObject";
+
+                case OBJECTTYPE.LINE:
+                    return "LineObject";
+
+                default:
+                    return "SquareObject";
+            }
+        }
+
+        public static string GetObjectScenePath(OBJECTTYPE type)
+        {
+            return $"res://scenes/SpecificObjects/{ObjectTypeToString(type)}.tscn";
+        }
+    }
     public enum OBJECTTYPE
     {
         DOT, SQUARE, LINE, CIRCLE, NOTAOBJECT

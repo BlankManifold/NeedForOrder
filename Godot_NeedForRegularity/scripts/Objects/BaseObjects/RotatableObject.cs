@@ -39,6 +39,21 @@ namespace GameObjects
         }
 
 
+        public override Godot.Collections.Dictionary<string, object> CreateDict()
+        {
+            
+            Godot.Collections.Dictionary<string, object> dict = base.CreateDict();
+            dict.Add("GlobalRotation", GlobalRotation);
+
+            return dict;
+        }
+        public override void LoadData(Godot.Collections.Dictionary<string, object> data)
+        {
+            base.LoadData(data);
+            GlobalRotation = (float)data["GlobalRotation"];
+        }
+
+
 
         public override void InputControlFlow(InputEvent @event)
         {
@@ -114,7 +129,7 @@ namespace GameObjects
         protected override void InputMovementMotion(InputEventMouseMotion mouseMotion)
         {
             setupFollowMouse(mouseMotion.Position);
-            UpdateRotationAreaInitialPos(GlobalPosition);
+            CheckRotationAreaCollision(GlobalPosition);  
         }
 
 
@@ -187,7 +202,7 @@ namespace GameObjects
             }
             return false;
         }
-        protected void UpdateRotationAreaInitialPos(Vector2 referencePos)
+        protected void CheckRotationAreaCollision(Vector2 referencePos)
         {
             KinematicCollision2D collisionInfo = _rotationArea.MoveAndCollide(Vector2.Zero, testOnly: true);
 
@@ -203,15 +218,18 @@ namespace GameObjects
 
                     if (Globals.ScreenInfo.VisibleRect.HasPoint(checkingPos))
                     {
-                        _rotationArea.GlobalPosition = referencePos + GlobalPosition.DirectionTo(checkingPos) * _rotationRadius;
-                        // _rotationAreaInitialPos = _rotationArea.Position;
-                        _rotationAreaInitialPos = _rotationArea.GlobalPosition - referencePos;
+                        _rotationArea.GlobalPosition = referencePos + referencePos.DirectionTo(checkingPos) * _rotationRadius;
+                        UpdateRotationAreaInitialPos(referencePos);
                         break;
                     }
 
                 }
             }
 
+        }
+        protected virtual void UpdateRotationAreaInitialPos(Vector2 _)
+        {
+            _rotationAreaInitialPos = _rotationArea.Position;
         }
 
 

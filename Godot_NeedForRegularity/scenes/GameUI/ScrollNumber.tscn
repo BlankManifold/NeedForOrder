@@ -64,6 +64,7 @@ size_flags_vertical = 4
 texture = ExtResource( 2 )
 stretch_mode = 5
 script = ExtResource( 4 )
+_objectType = 4
 _number = 6
 
 [node name="Label" type="Label" parent="CenterContainer/HBoxContainer/SquareIcon" index="0"]
@@ -91,6 +92,7 @@ size_flags_vertical = 4
 texture = ExtResource( 2 )
 stretch_mode = 5
 script = ExtResource( 4 )
+_objectType = 4
 _number = 10
 
 [node name="Label" type="Label" parent="CenterContainer/HBoxContainer/DotIcon" index="0"]
@@ -118,6 +120,7 @@ size_flags_vertical = 4
 texture = ExtResource( 2 )
 stretch_mode = 5
 script = ExtResource( 4 )
+_objectType = 4
 _number = 20
 
 [node name="Label" type="Label" parent="CenterContainer/HBoxContainer/LineIcon" index="0"]

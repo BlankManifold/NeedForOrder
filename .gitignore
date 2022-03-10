@@ -5,6 +5,7 @@ export_presets.cfg
 export/
 android/
 *.log
+*.save
 
 # Mono-specific ignores
 .mono/
@@ -14,3 +15,6 @@ data_*/
 # Ignore VSCODE stuff
 .vscode/
 .DS_Store
+
+# Other stuff
+*.drawio

@@ -10,22 +10,23 @@ namespace Main
         private GAMESTATE _gamestate = GAMESTATE.IDLE;
         private OBJECTTYPE _objectType = OBJECTTYPE.SQUARE;
         private uint _objectsNumber = 3;
-       
+
         private Node _objectsContainer;
         private Area2D _mouseArea;
         private Label _label;
         private GameUI.GameUI _gameUI;
         private Godot.Collections.Array<GameUI.ScrollIconGameUI> _UIButtons;
 
-    
+
 
         public override void _Ready()
         {
             Globals.ScreenInfo.UpdateScreenInfo(GetViewport());
 
-            // GetViewport().GuiDisableInput = true;   
             _gameUI = GetNode<GameUI.GameUI>("GameUILayer/GameUI");
             _UIButtons = new Godot.Collections.Array<GameUI.ScrollIconGameUI>(GetTree().GetNodesInGroup("UIButton"));
+            _mouseArea = GetNode<Area2D>("MouseArea");
+            _label = GetNode<Label>("Label");
 
             PackedScene levelBarrierScene = (PackedScene)ResourceLoader.Load("res://scenes/BackgroundAndLevel/LevelBarrier.tscn");
             BackgroundAndLevel.LevelBarrier levelBarrier = levelBarrierScene.Instance<BackgroundAndLevel.LevelBarrier>();
@@ -36,18 +37,14 @@ namespace Main
             RandomManager.rng.Randomize();
             _objectsContainer = GetNode<Node>("ObjectsContainer");
 
-            SpawnObjects();
-
-            _mouseArea = GetNode<Area2D>("MouseArea");
-
-            _label = GetNode<Label>("Label");
+            LoadObjects(_objectType, _objectsNumber);
         }
         public override void _PhysicsProcess(float delta)
         {
             UpdateState();
             UpdateMouseAreaPosition(GetGlobalMousePosition());
-            
-            
+
+
             if (BaseObject.s_selectedObject != null)
             {
                 _label.Text = BaseObject.s_selectedObject.InfoString();
@@ -55,7 +52,7 @@ namespace Main
 
             switch (_gamestate)
             {
-                
+
                 case GAMESTATE.MOVING:
                     BaseObject.s_selectedObject.MoveObject(delta);
                     break;
@@ -120,45 +117,51 @@ namespace Main
             }
             return null;
         }
-        private void SpawnObjects()
+        private void SpawnRandomObjects(OBJECTTYPE type, uint numberOfObjects)
         {
-            string objectType;
+            PackedScene objectScene = ResourceLoader.Load<PackedScene>(Utilities.GetObjectScenePath(type));
 
-            switch (_objectType)
+            for (int i = 0; i < numberOfObjects; i++)
             {
-                case OBJECTTYPE.SQUARE:
-                    objectType = "SquareObject";
-                    break;
-                case OBJECTTYPE.DOT:
-                    objectType = "DotObject";
-                    break;
-                case OBJECTTYPE.CIRCLE:
-                    objectType = "CircleObject";
-                    break;
-                case OBJECTTYPE.LINE:
-                    objectType = "LineObject";
-                    break;
 
-                default:
-                    objectType = "SquareObject";
-                    break;
-            }
-
-            PackedScene objectScene = ResourceLoader.Load<PackedScene>($"res://scenes/SpecificObjects/{objectType}.tscn");
-
-          
-            for (int i = 0; i < _objectsNumber; i++)
-            {
-                
                 BaseObject spawnedObject = objectScene.Instance<BaseObject>();
                 spawnedObject.InitRandomObject();
                 _objectsContainer.AddChild(spawnedObject);
-               
+
+            }
+        }
+        private void RandomizeObjects(bool isNumberFixed = true)
+        {
+            _gamestate = GAMESTATE.IDLE;
+            if (isNumberFixed)
+            {
+                foreach (BaseObject child in _objectsContainer.GetChildren())
+                {
+                    child.RandomizeObject();
+                }
+
+            }
+        }
+        private void LoadObjects(OBJECTTYPE type, uint numberOfObjects)
+        {
+            Godot.Collections.Array objects = _objectsContainer.GetChildren();
+
+            SaveSystem.SaveObjectsHandler.SaveObjects(_objectType, _objectsNumber, objects);
+
+            foreach (Node child in objects)
+            {
+                child.QueueFree();
             }
 
+            bool areLoaded = SaveSystem.SaveObjectsHandler.LoadObjects(type, numberOfObjects, _objectsContainer);
+
+            if (!areLoaded)
+            {
+                SpawnRandomObjects(type, numberOfObjects);
+            }
 
         }
-       
+
 
 
         private void UpdateState()
@@ -228,37 +231,32 @@ namespace Main
         }
         private void UpdateMouseAreaPosition(Vector2 newPosition)
         {
-            float x = Mathf.Clamp(newPosition.x,0,Globals.ScreenInfo.VisibleRectSize.x);
-            float y = Mathf.Clamp(newPosition.y,0,Globals.ScreenInfo.VisibleRectSize.y);
-            _mouseArea.GlobalPosition = new Vector2(x,y);
+            float x = Mathf.Clamp(newPosition.x, 0, Globals.ScreenInfo.VisibleRectSize.x);
+            float y = Mathf.Clamp(newPosition.y, 0, Globals.ScreenInfo.VisibleRectSize.y);
+            _mouseArea.GlobalPosition = new Vector2(x, y);
         }
-
 
 
 
         public void _on_ScrollGameUI_ObjectTypeChanged(OBJECTTYPE type)
         {
-            foreach (Node child in _objectsContainer.GetChildren())
-            {
-                child.QueueFree();                
-            }
+            LoadObjects(type, _objectsNumber);
+
             _gamestate = GAMESTATE.IDLE;
             _objectType = type;
-            
-            SpawnObjects(); 
         }
         public void _on_ScrollGameUI_NumberChanged(uint newNumber)
         {
-
-            foreach (Node child in _objectsContainer.GetChildren())
-            {
-                child.QueueFree();                
-            }
+            LoadObjects(_objectType, newNumber);
+           
             _gamestate = GAMESTATE.IDLE;
             _objectsNumber = newNumber;
-            
-            SpawnObjects(); 
         }
 
+        public void _on_RandomizeButton_RandomizePressed()
+        {
+            RandomizeObjects();
+        }
     }
+
 }

@@ -28,7 +28,7 @@ namespace GameObjects
 
         public override void InitRandomObject()
         {
-            int offset = _lenght / 2;
+            int offset = (int)(_lenght/Mathf.Sqrt2) + 1;
             int positionX = Globals.RandomManager.rng.RandiRange(offset, (int)Globals.ScreenInfo.PlayableSize[0] - offset);
             int positionY = Globals.RandomManager.rng.RandiRange(offset, (int)Globals.ScreenInfo.PlayableSize[1] - offset);
 
@@ -36,8 +36,7 @@ namespace GameObjects
 
             GlobalPosition = new Vector2(positionX, positionY);
             GlobalRotationDegrees = angleDegrees;
-            // Modulate = new Color(GD.Randf(),GD.Randf(),GD.Randf());
-           
+            RelevantRotationAngle = Mathf.Deg2Rad(angleDegrees);
         }
 
         public override void _Ready()

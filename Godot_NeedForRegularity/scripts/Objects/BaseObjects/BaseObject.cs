@@ -27,11 +27,11 @@ namespace GameObjects
 
 
         protected Vector2 _clickedRelativePosition;
-        
+
 
         [Signal]
         public delegate void UpdateSelection(bool eliminateOldSelection);
-       
+
 
         public virtual void Init(Vector2 position)
         {
@@ -44,8 +44,12 @@ namespace GameObjects
 
             GlobalPosition = new Vector2(positionX, positionY);
         }
+        public virtual void RandomizeObject()
+        {
+            InitRandomObject();
+        }
 
-       
+
 
         public override void _Ready()
         {
@@ -60,6 +64,20 @@ namespace GameObjects
         }
 
 
+        public virtual Godot.Collections.Dictionary<string, object> CreateDict()
+        {
+            Godot.Collections.Dictionary<string, object> dict = new Godot.Collections.Dictionary<string, object>()
+            {
+                { "PositionX", Position.x },
+                { "PositionY", Position.y },
+            };
+
+            return dict;
+        }
+        public virtual void LoadData(Godot.Collections.Dictionary<string, object> data)
+        {
+            GlobalPosition = new Vector2((float)data["PositionX"], (float)data["PositionY"]);
+        }
 
         public virtual void InputControlFlow(InputEvent @event)
         {
@@ -72,9 +90,9 @@ namespace GameObjects
             // IF NOT UNSELECTED -> HANDLE MOVING
             if (_state != Globals.OBJECTSTATE.UNSELECTED)
             {
-                
+
                 HandleMotionInput(@event);
-                   
+
                 return;
             }
         }
@@ -128,9 +146,9 @@ namespace GameObjects
             _clickedRelativePosition = mouseButtonEvent.Position - GlobalPosition;
         }
         protected virtual void InputMovementReleased() { }
-        
-        
-        
+
+
+
         public virtual void SelectObject()
         {
             _state = Globals.OBJECTSTATE.PRESSED;
@@ -151,24 +169,24 @@ namespace GameObjects
 
         }
 
-        
-        
+
+
         protected virtual void setupFollowMouse(Vector2 followPosition)
         {
             RelevantPosition = followPosition - _clickedRelativePosition;
         }
 
-        
-       
+
+
         public virtual string InfoString()
         {
-            string text =  $"STATE: {_state}\n Selectable: {s_selectable}";
+            string text = $"STATE: {_state}\n Selectable: {s_selectable}";
 
 
             return text;
         }
 
-       
+
     }
 
 }

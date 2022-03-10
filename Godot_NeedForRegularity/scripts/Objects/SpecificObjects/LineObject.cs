@@ -22,7 +22,7 @@ namespace GameObjects
         private CollisionShape2D _selectionAreaShape;
 
         private float _delta;
-        
+
 
 
         public override void InitRandomObject()
@@ -33,15 +33,17 @@ namespace GameObjects
 
             _angleDegrees = Globals.RandomManager.rng.RandfRange(-Mathf.Pi / 2, Mathf.Pi / 2);
 
-            // GlobalPosition = new Vector2(positionX, positionY);
-            // GlobalRotationDegrees = angleDegrees;
-
-
             _coefficients.x = positionX;
             _coefficients.y = positionY;
             _m = Mathf.Tan(_angleDegrees);
             RelevantPosition = Vector2.Zero;
+            RelevantRotationAngle = _angleDegrees;
 
+        }
+        public override void RandomizeObject()
+        {
+            base.RandomizeObject();
+            UpdateAll();
         }
 
 
@@ -58,8 +60,8 @@ namespace GameObjects
             _lineCenterNode = GetNode<Position2D>("LineCenter");
             UpdateAll();
 
+            RelevantPosition = Vector2.Zero;
             RelevantRotationAngle = _angleDegrees;
-
         }
         public override void _Process(float delta)
         {
@@ -76,6 +78,28 @@ namespace GameObjects
             else
                 _rotationArea.Modulate = new Color(1, 1, 1);
 
+        }
+
+
+
+        public override Godot.Collections.Dictionary<string, object> CreateDict()
+        {
+
+            Godot.Collections.Dictionary<string, object> dict = base.CreateDict();
+            
+            dict.Add("AngleDegrees", _angleDegrees);
+            dict.Add("CoeffientX", _coefficients.x);
+            dict.Add("CoeffientY", _coefficients.y);
+            dict.Add("AngularCoeff", _m);
+
+            return dict;
+        }
+        public override void LoadData(Godot.Collections.Dictionary<string, object> data)
+        {
+            base.LoadData(data);
+            _angleDegrees = (float)data["AngleDegrees"];
+            _m = (float)data["AngularCoeff"];
+            _coefficients = new Vector2( (float)data["CoeffientX"], (float)data["CoeffientY"]);
         }
 
 
@@ -178,7 +202,7 @@ namespace GameObjects
         protected override void InputMovementMotion(InputEventMouseMotion mouseMotion)
         {
             setupFollowMouse(mouseMotion.Relative);
-            UpdateRotationAreaInitialPos(_lineCenterNode.GlobalPosition);
+            CheckRotationAreaCollision(_lineCenterNode.GlobalPosition);
         }
         protected override void InputMovementPressed(InputEventMouseButton _) { }
 
@@ -272,7 +296,10 @@ namespace GameObjects
             UpdateShape();
             UpdateRotationArea();
         }
-
+        protected override void UpdateRotationAreaInitialPos(Vector2 referencePos)
+        {
+            _rotationAreaInitialPos = _rotationArea.GlobalPosition - referencePos;
+        }
 
 
         public override string InfoString()

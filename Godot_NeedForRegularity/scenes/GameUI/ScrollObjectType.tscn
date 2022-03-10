@@ -108,6 +108,10 @@ __meta__ = {
 }
 
 [node name="LineIcon" type="TextureRect" parent="CenterContainer/HBoxContainer" index="3" groups=["UIButton"]]
+anchor_left = -1.43608
+anchor_top = -11.912
+anchor_right = -1.43608
+anchor_bottom = -11.912
 margin_left = 543.0
 margin_right = 704.0
 margin_bottom = 159.0
