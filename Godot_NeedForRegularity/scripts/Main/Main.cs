@@ -123,11 +123,9 @@ namespace Main
 
             for (int i = 0; i < numberOfObjects; i++)
             {
-
                 BaseObject spawnedObject = objectScene.Instance<BaseObject>();
                 spawnedObject.InitRandomObject();
                 _objectsContainer.AddChild(spawnedObject);
-
             }
         }
         private void RandomizeObjects(bool isNumberFixed = true)
@@ -145,13 +143,16 @@ namespace Main
         private void LoadObjects(OBJECTTYPE type, uint numberOfObjects)
         {
             Godot.Collections.Array objects = _objectsContainer.GetChildren();
-
-            SaveSystem.SaveObjectsHandler.SaveObjects(_objectType, _objectsNumber, objects);
-
-            foreach (Node child in objects)
+            if (objects.Count != 0)
             {
-                child.QueueFree();
+                SaveSystem.SaveObjectsHandler.SaveObjects(_objectType, _objectsNumber, objects);
+
+                foreach (Node child in objects)
+                {
+                    child.QueueFree();
+                }
             }
+
 
             bool areLoaded = SaveSystem.SaveObjectsHandler.LoadObjects(type, numberOfObjects, _objectsContainer);
 
@@ -248,7 +249,7 @@ namespace Main
         public void _on_ScrollGameUI_NumberChanged(uint newNumber)
         {
             LoadObjects(_objectType, newNumber);
-           
+
             _gamestate = GAMESTATE.IDLE;
             _objectsNumber = newNumber;
         }
