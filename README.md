@@ -20,7 +20,6 @@ and (maybe?) save the configurations you created. You can also choose to use a b
 ## Progress updates
 
 ### 23/02/2022
-
 * Created and setup the Godot project: 2d/expand/portrait mode
 * Created and connected the repository to VSCoce
 * Planned the base structure of different classes/nodes in UML
@@ -58,9 +57,20 @@ and (maybe?) save the configurations you created. You can also choose to use a b
 * `LineObject` motion: mouse movement is related to movement in the $(x_0, b)$ parameter-space, the main `KinematicBody2D` does not move, movement is in the  $(x_0, b)$ parameter-space and update line points (intersection points with playable area) every frame (a mouse movement along the x-axis changes `_x0`, along the y-axis changes `_b`)
 
 
-## 06/03/2022
+### 06/03/2022
 * Implemented `LineObject` rotation: similar to motion, rotation takes place on the `_m` parameter; before the rotation setup the rotation center: it is the current line center (respect the intersection points) → so set $(x_0,b)$ equals to the center point (does not change the line and put the center rotation in the correct position)
 * Implemented rotation snapping in `RotatableObject` (to default snaps every 45° with a delta-angle threshold 3°): smooth rotation unless $|TargetAngle - MultipleOfSnappingAngle| < DeltaAngleThreshold$
 * Refactored some code/inheritance structure in/of `RotationObject`, `LineObject`, `BaseObject`: create some general function (like `InputRotationPressed`, `InputMovementMotion`...) to be called in the `HandleInputMotion` and `HandleInputRotation` function → reduced copy and paste code and makes motion/rotation more general
 * Created `ScrollNumber` and `ScrollNumberIconGameUI` and connected to `Main`: scroll UI that can change number of objects spawned
 * Adeed `ScrollNumber` to the main UI node `GameUI`
+
+
+### 13/03/2022
+* Added `RandomizeButton` to `GameUI` and connected to `Main`: re-randomize objects property, not number of objects spawned
+* Implemented `RandomnizeObjects` in `Main` and `RandomizeObject` in `BaseObject`, calls overriden `InitRandomObject` and if necessary updates the others object members nedeed to redraw the object (like intersection points in `LineObject`) 
+* Created `SaveHandler` namespace and `SaveObjectsHandler` as static class, contains: `SaveObjects` and `LoadObjects` → I followed Godot 3.4 docs, every time save function it's called it creates new dict (specific to current objects) for every objects and saves it in a JSON file; on load reads that specific file 
+* On `ObjectTypeChanged` and `NumberChanged` signals emitted by `ScrollGameUI`, `Main` saves current objects-configuration and loads objects from a file if it exits else calls `SpawnRandomObjects`; calling the save function a file with name `${ObjectType}{NumberOfObjects}.save` is created
+* `BaseObject`, `RotatableObject` and every specific object has `CreateDict` and `LoadData` functions
+* Added a `Utilities` static class in `Globals` namespace, contains: `ObjectTypeToString` and `GetObjectScenePath` functions
+* Created `ScrollBackgroundIconGameUI` and `ScrollBackground`: scroll icons to change background; contain a texture used as a tile (stretch mode Tile) to fill the background with a specific pattern
+* In `${ObjectType}{NumberOfObjects}.save` save-files save also the last background-pattern used (stored in last line of the file) and when number/type is changed  the corrisponding icon in `ScrollBackground` it's seleceted  

@@ -5,7 +5,7 @@ namespace SaveSystem
 {
     public static class SaveObjectsHandler
     {
-        public static void SaveObjects(Globals.OBJECTTYPE objectType, uint numberOfObjects, Godot.Collections.Array objects)
+        public static void SaveObjects(Globals.OBJECTTYPE objectType, uint numberOfObjects, Godot.Collections.Array objects)//, uint backgroundNumber)
         {
             File objectsDataFile = new File();
             objectsDataFile.Open($"user://{Utilities.ObjectTypeToString(objectType)}{numberOfObjects}.save", File.ModeFlags.Write);
@@ -16,6 +16,10 @@ namespace SaveSystem
 
                 objectsDataFile.StoreLine(JSON.Print(data));
             }
+
+            // Godot.Collections.Dictionary<string, uint> backgroundData = new Godot.Collections.Dictionary<string, uint> ();
+            // backgroundData.Add("BackgroundNumber", backgroundNumber);
+            // objectsDataFile.StoreLine(JSON.Print(backgroundData));
 
             objectsDataFile.Close();
         }

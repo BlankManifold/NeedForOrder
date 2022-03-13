@@ -1,0 +1,81 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://scenes/GameUI/ScrollGameUI.tscn" type="PackedScene" id=1]
+[ext_resource path="res://assets/backgroundTile/line2.png" type="Texture" id=2]
+[ext_resource path="res://assets/gameUI/square.png" type="Texture" id=3]
+[ext_resource path="res://scripts/GameUI/ScrollBackgroundIconGameUI.cs" type="Script" id=4]
+[ext_resource path="res://scripts/GameUI/ScrollBackground.cs" type="Script" id=5]
+[ext_resource path="res://assets/backgroundTile/line3.png" type="Texture" id=6]
+[ext_resource path="res://assets/backgroundTile/cross1.png" type="Texture" id=7]
+
+[node name="ScrollBackground" instance=ExtResource( 1 )]
+script = ExtResource( 5 )
+
+[node name="CenterContainer" parent="." index="1"]
+margin_left = 217.0
+margin_top = 43.0
+margin_right = 502.0
+margin_bottom = 143.0
+rect_min_size = Vector2( 285, 100 )
+
+[node name="CollisionShape2D" parent="CenterContainer/Area2D" index="0"]
+position = Vector2( 517, 137 )
+
+[node name="HBoxContainer" parent="CenterContainer" index="1"]
+anchor_left = 0.5
+anchor_top = 0.467
+anchor_right = 0.5
+anchor_bottom = 0.467
+margin_left = -116.5
+margin_top = -38.7
+margin_right = 587.5
+margin_bottom = 120.3
+
+[node name="Line0" type="TextureRect" parent="CenterContainer/HBoxContainer" index="0" groups=["UIButton"]]
+margin_right = 161.0
+margin_bottom = 159.0
+rect_min_size = Vector2( 161, 159 )
+mouse_filter = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource( 2 )
+stretch_mode = 5
+script = ExtResource( 4 )
+_textureTile = ExtResource( 2 )
+
+[node name="Blank" type="TextureRect" parent="CenterContainer/HBoxContainer" index="1" groups=["UIButton"]]
+margin_left = 181.0
+margin_right = 342.0
+margin_bottom = 159.0
+mouse_filter = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource( 3 )
+stretch_mode = 5
+script = ExtResource( 4 )
+
+[node name="Line1" type="TextureRect" parent="CenterContainer/HBoxContainer" index="2" groups=["UIButton"]]
+margin_left = 362.0
+margin_right = 523.0
+margin_bottom = 159.0
+rect_min_size = Vector2( 161, 159 )
+mouse_filter = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource( 6 )
+stretch_mode = 5
+script = ExtResource( 4 )
+_textureTile = ExtResource( 6 )
+
+[node name="Cross0" type="TextureRect" parent="CenterContainer/HBoxContainer" index="3" groups=["UIButton"]]
+margin_left = 543.0
+margin_right = 704.0
+margin_bottom = 159.0
+rect_min_size = Vector2( 161, 159 )
+mouse_filter = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource( 7 )
+stretch_mode = 5
+script = ExtResource( 4 )
+_textureTile = ExtResource( 7 )

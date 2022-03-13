@@ -25,7 +25,6 @@ margin_left = 15.0
 margin_top = -38.0
 margin_right = 719.0
 margin_bottom = 121.0
-rect_scale = Vector2( 0.5, 0.5 )
 
 [node name="CircleIcon" type="TextureRect" parent="CenterContainer/HBoxContainer" index="0" groups=["UIButton"]]
 margin_right = 161.0

@@ -55,7 +55,7 @@ namespace GameUI
             await ToSignal(GetTree(),"idle_frame");
             SetInitialValue(focused:false);
 
-            GetNode<Label>("Label").Text += " " + GetIndex();
+            //GetNode<Label>("Label").Text += " " + GetIndex();
         }
 
         public void SetInitialValue(bool focused = false)

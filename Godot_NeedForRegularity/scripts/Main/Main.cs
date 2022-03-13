@@ -11,11 +11,15 @@ namespace Main
         private OBJECTTYPE _objectType = OBJECTTYPE.SQUARE;
         private uint _objectsNumber = 3;
 
+        private uint _backgroundNumber = 1; 
+
         private Node _objectsContainer;
         private Area2D _mouseArea;
         private Label _label;
         private GameUI.GameUI _gameUI;
         private Godot.Collections.Array<GameUI.ScrollIconGameUI> _UIButtons;
+
+        private TextureRect _backgroundTile;
 
 
 
@@ -33,6 +37,10 @@ namespace Main
             levelBarrier.Name = "LevelBarrier";
             levelBarrier.YLimitOffset = (int)_gameUI.RectSize.y;
             AddChild(levelBarrier);
+
+            _backgroundTile = GetNode<TextureRect>("BackgroundLayer/PatternTile");
+            _backgroundTile.Texture = null;
+
 
             RandomManager.rng.Randomize();
             _objectsContainer = GetNode<Node>("ObjectsContainer");
@@ -252,6 +260,14 @@ namespace Main
 
             _gamestate = GAMESTATE.IDLE;
             _objectsNumber = newNumber;
+        }
+        public void _on_ScrollGameUI_BackgroundChanged(Texture textureTile, uint backgroundNumber)
+        {
+            LoadObjects(_objectType, _objectsNumber);
+
+            _gamestate = GAMESTATE.IDLE;
+            _backgroundTile.Texture = textureTile;
+            _backgroundNumber = backgroundNumber;
         }
 
         public void _on_RandomizeButton_RandomizePressed()
