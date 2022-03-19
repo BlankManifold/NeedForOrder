@@ -7,16 +7,24 @@ namespace GameObjects
     public class RotatableObject : BaseObject, IRotatable
     {
         protected bool _rotatable = false;
+        public bool Rotatable
+        {
+            get { return _rotatable; }
+            set { _rotatable = value; }
+        }
         protected bool _imOnRotationArea = false;
-       
+
 
         protected KinematicBody2D _rotationArea;
-        protected Vector2 _rotationAreaInitialPos = new Vector2(70, 70);
+        protected CollisionShape2D _rotationAreaShape;
+
+        [Export]
+        protected Vector2 _rotationAreaInitialPos;
         protected float _rotationRadius;
         // protected CollisionShape2D _rotationRadiusShape;
-        
+
         public float RelevantRotationAngle { get; set; } = 0f;
-        
+
 
         [Export]
         protected bool _rotationSnappable = true;
@@ -32,8 +40,11 @@ namespace GameObjects
             base._Ready();
 
             _rotationArea = (KinematicBody2D)FindNode("RotationArea");
+            _rotationAreaShape = _rotationArea.GetNode<CollisionShape2D>("CollisionShape2D");
+
             _rotationArea.Position = _rotationAreaInitialPos;
             _rotationArea.Visible = false;
+            _rotationAreaShape.Disabled = true;
             _rotationRadius = _rotationAreaInitialPos.Length();
             RelevantRotationAngle = GlobalRotation;
         }
@@ -41,7 +52,7 @@ namespace GameObjects
 
         public override Godot.Collections.Dictionary<string, object> CreateDict()
         {
-            
+
             Godot.Collections.Dictionary<string, object> dict = base.CreateDict();
             dict.Add("GlobalRotation", GlobalRotation);
 
@@ -80,16 +91,16 @@ namespace GameObjects
         {
             if (@event is InputEventMouseButton mouseButtonEvent && IsInstanceValid(@event))
             {
-                if (mouseButtonEvent.IsActionReleased("select"))
+                if (mouseButtonEvent.IsActionReleased("select") || !mouseButtonEvent.IsPressed())
                 {
                     _state = Globals.OBJECTSTATE.SELECTED;
                     s_someonePressed = false;
 
-                    if (!_imOnRotationArea)
-                    {
-                        _rotatable = false;
-                        s_selectable = true;
-                    }
+                    // if (!_imOnRotationArea)
+                    // {
+                    //     _rotatable = false;
+                    //     s_selectable = true;
+                    // }
 
                     InputRotationReleased();
 
@@ -97,7 +108,7 @@ namespace GameObjects
                     return;
                 }
 
-                if (mouseButtonEvent.IsActionPressed("select"))
+                if (mouseButtonEvent.IsActionPressed("select") || mouseButtonEvent.IsPressed())
                 {
                     if (_state != Globals.OBJECTSTATE.ROTATING)
                     {
@@ -124,14 +135,15 @@ namespace GameObjects
         protected virtual void InputRotationReleased()
         {
             RelevantRotationAngle = GlobalRotation;
+            _rotatable = false;
         }
         protected virtual void InputRotationPressed() { }
         protected override void InputMovementMotion(InputEventMouseMotion mouseMotion)
         {
             setupFollowMouse(mouseMotion.Position);
-            CheckRotationAreaCollision(GlobalPosition);  
+            CheckRotationAreaCollision(GlobalPosition);
         }
-
+        
 
 
         public virtual void RotateObject()
@@ -153,11 +165,13 @@ namespace GameObjects
         {
             base.SelectObject();
             _rotationArea.Visible = true;
+            _rotationAreaShape.Disabled = false;
         }
         public override void UnSelectObject()
         {
             base.UnSelectObject();
             _rotationArea.Visible = false;
+            _rotationAreaShape.Disabled = true;
         }
 
 
@@ -234,39 +248,10 @@ namespace GameObjects
 
 
 
-        public void _on_RotationArea_mouse_exited()
-        {
-            if (_state != Globals.OBJECTSTATE.UNSELECTED)
-            {
-                _imOnRotationArea = false;
-
-                if (_state != Globals.OBJECTSTATE.ROTATING)
-                {
-                    s_selectable = true;
-                    _rotatable = false;
-                }
-            }
-        }
-        public void _on_RotationArea_mouse_entered()
-        {
-            if (_state != Globals.OBJECTSTATE.UNSELECTED)
-            {
-                _imOnRotationArea = true;
-
-                if (_state == Globals.OBJECTSTATE.SELECTED)
-                {
-                    s_selectable = false;
-                    _rotatable = true;
-                }
-            }
-        }
-
-
-
         public override string InfoString()
         {
-            string text = $"STATE: {_state} \nSelectable: {s_selectable}";
-            text = $"\nInRotationArea: {_imOnRotationArea}\nRotatable: {_rotatable}";
+            string text = $"STATE: {_state}";
+            text += $"\nInRotationArea: {_imOnRotationArea}\nRotatable: {_rotatable}";
             text += $"\nSize: {GetViewport().GetVisibleRect().Size}";
             text += $"\nRotation: {GlobalRotationDegrees}";
             text += $"\nGlobal: {GlobalPosition}";

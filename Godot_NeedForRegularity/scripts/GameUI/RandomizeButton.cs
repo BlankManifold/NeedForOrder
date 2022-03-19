@@ -11,7 +11,7 @@ namespace GameUI
         public override void _Ready()
         {
             base._Ready();
-
+        
             Main.Main mainNode = (Main.Main)GetTree().GetNodesInGroup("main")[0];
             Connect(nameof(RandomizePressed), mainNode, "_on_RandomizeButton_RandomizePressed");
         }

@@ -11,10 +11,9 @@ namespace GameObjects
         protected bool _overlappaple = true;
 
 
-        public static bool s_selectable = true;
         public static bool s_someonePressed = false;
         public static BaseObject s_selectedObject = null;
-        public static BaseObject s_hoveredObject = null;
+        // public static BaseObject s_hoveredObject = null;
 
 
         public Vector2 RelevantPosition { get; set; }
@@ -27,6 +26,7 @@ namespace GameObjects
 
 
         protected Vector2 _clickedRelativePosition;
+        protected Tween _tween;
 
 
         [Signal]
@@ -61,7 +61,9 @@ namespace GameObjects
                 CollisionMask += 1;
             }
 
+            _tween = GetNode<Tween>("Tween");
         }
+
 
 
         public virtual Godot.Collections.Dictionary<string, object> CreateDict()
@@ -78,6 +80,8 @@ namespace GameObjects
         {
             GlobalPosition = new Vector2((float)data["PositionX"], (float)data["PositionY"]);
         }
+
+
 
         public virtual void InputControlFlow(InputEvent @event)
         {
@@ -114,7 +118,7 @@ namespace GameObjects
 
             if (@event is InputEventMouseButton mouseButtonEvent && IsInstanceValid(@event))
             {
-                if (mouseButtonEvent.IsActionReleased("select"))
+                if (mouseButtonEvent.IsActionReleased("select") || !mouseButtonEvent.IsPressed())
                 {
                     _state = Globals.OBJECTSTATE.SELECTED;
                     s_someonePressed = false;
@@ -125,7 +129,7 @@ namespace GameObjects
                     return;
                 }
 
-                if (mouseButtonEvent.IsActionPressed("select"))
+                if (mouseButtonEvent.IsActionPressed("select") || mouseButtonEvent.IsPressed())
                 {
                     _state = Globals.OBJECTSTATE.PRESSED;
                     s_someonePressed = true;
@@ -175,15 +179,22 @@ namespace GameObjects
         {
             RelevantPosition = followPosition - _clickedRelativePosition;
         }
+        public virtual void UpdateToValidPosition()
+        {
+            Vector2 newPosition = FindPositionInPlayableArea();
+            if (newPosition != GlobalPosition)
+            {
+                _tween.InterpolateProperty(this, "position", GlobalPosition, newPosition, 0.2f);
+                _tween.Start();
+            }
+        }
+        protected virtual Vector2 FindPositionInPlayableArea() { return GlobalPosition; }
 
 
 
         public virtual string InfoString()
         {
-            string text = $"STATE: {_state}\n Selectable: {s_selectable}";
-
-
-            return text;
+            return "";
         }
 
 

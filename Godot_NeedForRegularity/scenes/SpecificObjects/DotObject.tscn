@@ -4,6 +4,7 @@
 [ext_resource path="res://scenes/BaseObjects/BaseObject.tscn" type="PackedScene" id=2]
 
 [sub_resource type="CircleShape2D" id=1]
+radius = 40.0
 
 [node name="BaseObject" instance=ExtResource( 2 )]
 script = ExtResource( 1 )

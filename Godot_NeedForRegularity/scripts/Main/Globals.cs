@@ -45,6 +45,46 @@ namespace Globals
     {
         DOT, SQUARE, LINE, CIRCLE, NOTAOBJECT
     }
+    public struct ObjectsInterfaces
+    {
+        public bool IMovable;
+        public bool IRotatable;
+        public bool IScalable;
+
+        public ObjectsInterfaces(bool movable = true, bool rotatable = false, bool scalable = false)
+        {
+            IMovable = movable;
+            IRotatable = rotatable;
+            IScalable = scalable;
+        }
+
+        public ObjectsInterfaces(OBJECTTYPE type)
+        {
+            switch (type)
+            {
+                case OBJECTTYPE.SQUARE:
+                case OBJECTTYPE.LINE:
+
+                    IMovable = true;
+                    IRotatable = true;
+                    IScalable = false;
+                    break;
+
+                case OBJECTTYPE.DOT:
+                case OBJECTTYPE.CIRCLE:
+                    IMovable = true;
+                    IRotatable = false;
+                    IScalable = false;
+                    break;
+
+                default:
+                    IMovable = true;
+                    IRotatable = false;
+                    IScalable = false;
+                    break;
+            }
+        }
+    }
 
     public struct ScreenInfo
     {

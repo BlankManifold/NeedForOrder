@@ -6,8 +6,8 @@ namespace GameObjects
 {
     public class SquareObject : RotatableObject
     {
-        [Export(PropertyHint.Range, "0,100")]
-        private int _lenght = 50;
+        [Export]
+        private int _lenght;
         public int Lenght
         {
             get { return _lenght; }
@@ -18,12 +18,8 @@ namespace GameObjects
             }
         }
 
-
-        [Export]
-        private int _standardLenght = 50;
-
         private ColorRect _colorRect;
-        private Label _label;
+        // private Label _label;
 
 
         public override void InitRandomObject()
@@ -64,6 +60,16 @@ namespace GameObjects
 
         }
 
+
+        protected override Vector2 FindPositionInPlayableArea()
+        {
+            float offset = _lenght/Mathf.Sqrt2;
+            if (GlobalPosition.x + offset > Globals.ScreenInfo.PlayableSize.x)
+            {
+                return new Vector2(Globals.ScreenInfo.PlayableSize.x - offset, GlobalPosition.y);
+            }
+            return GlobalPosition;
+        }
     }
 
 

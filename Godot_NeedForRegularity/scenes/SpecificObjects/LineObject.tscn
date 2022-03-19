@@ -4,12 +4,13 @@
 [ext_resource path="res://scripts/Objects/SpecificObjects/LineObject.cs" type="Script" id=2]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 5, 0 )
+extents = Vector2( 25, 0 )
 
 [node name="LineObject" instance=ExtResource( 1 )]
 collision_layer = 64
 collision_mask = 0
 script = ExtResource( 2 )
+_rotationAreaInitialPos = Vector2( 70, 70 )
 
 [node name="SelectionAreaShape" parent="." index="0"]
 shape = SubResource( 1 )
@@ -21,8 +22,9 @@ position = Vector2( 70, 70 )
 mouse_filter = 2
 
 [node name="Line2D" type="Line2D" parent="." index="3"]
+position = Vector2( 0, 1 )
 points = PoolVector2Array( 0, 0, 0, 0 )
-width = 5.0
+width = 8.0
 default_color = Color( 0.4, 0.501961, 1, 1 )
 
 [node name="LineCenter" type="Position2D" parent="." index="4"]

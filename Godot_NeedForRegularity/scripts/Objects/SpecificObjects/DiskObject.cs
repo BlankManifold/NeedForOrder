@@ -2,8 +2,8 @@ using Godot;
 
 namespace GameObjects
 {
-    public class DiskObject : DotObject, IScalable
+    public class DiskObject : DotObject
     {
-        public void ScaleObject(float scaleFactor){}
+      
     }
 }

@@ -10,6 +10,7 @@
 
 [node name="ScrollBackground" instance=ExtResource( 1 )]
 script = ExtResource( 5 )
+_initialIndex = 1
 
 [node name="CenterContainer" parent="." index="1"]
 margin_left = 217.0

@@ -8,3 +8,5 @@ input_pickable = true
 script = ExtResource( 1 )
 
 [node name="SelectionAreaShape" type="CollisionShape2D" parent="."]
+
+[node name="Tween" type="Tween" parent="."]

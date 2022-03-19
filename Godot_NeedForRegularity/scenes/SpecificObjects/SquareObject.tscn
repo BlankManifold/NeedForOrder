@@ -4,25 +4,24 @@
 [ext_resource path="res://scenes/BaseObjects/RotatableObject.tscn" type="PackedScene" id=2]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 50, 50 )
+extents = Vector2( 64, 64 )
 
 [sub_resource type="CircleShape2D" id=2]
+radius = 30.0
 
 [node name="SquareObject" instance=ExtResource( 2 )]
 script = ExtResource( 1 )
-_lenght = 100
-_standardLenght = 100
+_lenght = 128
 
 [node name="ColorRect" type="ColorRect" parent="." index="0"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -50.0
-margin_top = -50.0
-margin_right = 50.0
-margin_bottom = 50.0
-rect_pivot_offset = Vector2( 50, 50 )
+margin_left = -64.0
+margin_top = -64.0
+margin_right = 64.0
+margin_bottom = 64.0
 mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
@@ -32,44 +31,10 @@ __meta__ = {
 shape = SubResource( 1 )
 
 [node name="RotationArea" parent="." index="2"]
-position = Vector2( 70, 70 )
+position = Vector2( 90, 90 )
 
 [node name="ColorRect" parent="RotationArea" index="0"]
 mouse_filter = 2
 
 [node name="CollisionShape2D" parent="RotationArea" index="1"]
 shape = SubResource( 2 )
-
-[node name="RotationRadiusShape" parent="RotationAreaRadius2D" index="0"]
-disabled = true
-
-[node name="Line2D" type="Line2D" parent="." index="4"]
-visible = false
-points = PoolVector2Array( 0, 0, 0, 0, 128, 0 )
-
-[node name="Label" type="Label" parent="Line2D" index="0"]
-visible = false
-margin_left = 96.0
-margin_top = 10.0
-margin_right = 104.0
-margin_bottom = 24.0
-text = "X"
-align = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Line2D2" type="Line2D" parent="." index="5"]
-visible = false
-points = PoolVector2Array( 0, 0, 0, 0, 0, 128 )
-
-[node name="Label" type="Label" parent="Line2D2" index="0"]
-visible = false
-margin_left = 10.0
-margin_top = 112.0
-margin_right = 17.0
-margin_bottom = 126.0
-text = "Y"
-__meta__ = {
-"_edit_use_anchors_": false
-}

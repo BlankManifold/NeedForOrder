@@ -12,7 +12,7 @@ namespace GameObjects
 
         private Vector2 _coefficients;
         // private float _coefficients.y = 0f;
-        private int _width = 4;
+        private int _width = 8;
         private float _angleDegrees;
 
         private Position2D _lineCenterNode;
@@ -86,7 +86,7 @@ namespace GameObjects
         {
 
             Godot.Collections.Dictionary<string, object> dict = base.CreateDict();
-            
+
             dict.Add("AngleDegrees", _angleDegrees);
             dict.Add("CoeffientX", _coefficients.x);
             dict.Add("CoeffientY", _coefficients.y);
@@ -99,7 +99,7 @@ namespace GameObjects
             base.LoadData(data);
             _angleDegrees = (float)data["AngleDegrees"];
             _m = (float)data["AngularCoeff"];
-            _coefficients = new Vector2( (float)data["CoeffientX"], (float)data["CoeffientY"]);
+            _coefficients = new Vector2((float)data["CoeffientX"], (float)data["CoeffientY"]);
         }
 
 
@@ -198,6 +198,7 @@ namespace GameObjects
         protected override void InputRotationReleased()
         {
             RelevantRotationAngle = _angleDegrees;
+            _rotatable = false;
         }
         protected override void InputMovementMotion(InputEventMouseMotion mouseMotion)
         {
@@ -300,12 +301,16 @@ namespace GameObjects
         {
             _rotationAreaInitialPos = _rotationArea.GlobalPosition - referencePos;
         }
+        public override void UpdateToValidPosition()
+        {
+            UpdateAll();
+        }
 
 
         public override string InfoString()
         {
-            string text = $"STATE: {_state} \nSelectable: {s_selectable}";
-            text = $"\nInRotationArea: {_imOnRotationArea}\nRotatable: {_rotatable}";
+            string text = $"STATE: {_state}";
+            text += $"\nInRotationArea: {_imOnRotationArea}\nRotatable: {_rotatable}";
             text += $"\nSize: {GetViewport().GetVisibleRect().Size}";
             text += $"\nRotation: {GlobalRotationDegrees}";
             text += $"\nGlobal: {GlobalPosition}";
