@@ -1,0 +1,34 @@
+{
+    "platforms": [
+        "all", 
+        "android"
+    ], 
+    "packages": {
+        "applovinmax-inmobi": {
+            "platforms": [
+                "android"
+            ], 
+            "version": "0.1.1", 
+            "dependencies": [
+                "applovinmax@0.1.1"
+            ]
+        }, 
+        "applovinmax": {
+            "platforms": [
+                "all", 
+                "android"
+            ], 
+            "variables": {
+                "AppLovin/SdkKey": {
+                    "info": "Set your SDK key here"
+                }
+            }, 
+            "version": "0.1.2", 
+            "autoload": {
+                "applovin_max": "*res://scripts/applovin_max.gd"
+            }, 
+            "dependencies": []
+        }
+    }, 
+    "id": "3011346e-ad88-4183-a0a8-31de5a0a99ac"
+}

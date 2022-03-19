@@ -73,4 +73,21 @@ and (maybe?) save the configurations you created. You can also choose to use a b
 * `BaseObject`, `RotatableObject` and every specific object has `CreateDict` and `LoadData` functions
 * Added a `Utilities` static class in `Globals` namespace, contains: `ObjectTypeToString` and `GetObjectScenePath` functions
 * Created `ScrollBackgroundIconGameUI` and `ScrollBackground`: scroll icons to change background; contain a texture used as a tile (stretch mode Tile) to fill the background with a specific pattern
-* In `${ObjectType}{NumberOfObjects}.save` save-files save also the last background-pattern used (stored in last line of the file) and when number/type is changed  the corrisponding icon in `ScrollBackground` it's seleceted  
+
+  
+### 20/03/2022
+* Created save system for background, saves in `${ObjectType}{NumberOfObjects}Background.save` the last background-pattern used and when number/type is changed the corrisponding icon in `ScrollBackground` it's seleceted; background saving separated to objects saving;
+* Added some "wait-till-tween-completed" logic for `GameUI` scroll-icon input-events 
+* Now  `LineObject` updates parameters on changes of the visibleRect area size   
+* Now movable object updates to a valid position on changes of the visibleRect area size 
+* Setup some Android export stuff: Android export template, Android build template, AndroidStudio for testing and USB testing/debugging
+* Setup some stuff to try to intoduce some studid and annoying ads on Android: NativeLib addons, Applovin account/test_device/Ad_unit/banner
+* Create `AdsHandler` (it's easier to use applovin_max autoloaded stuff in GDScript): `loadBanner` and signal `_on_shown_banner` and `_on_load_banner`
+* Connected `AdsHandler` to main: show banner ads only when re-randomize objects (call GDscript from C# with Call function)
+* Now selection/unselection/movement support touch input (not in a optimal/generic way but it works): emulate mouse from touch input it's on and add some `IsPressed` checking 
+* Create new collisions detection for selection/unselection method  `ReturnTopObjectMobile` for touch input: desktop version uses the `MouseArea.GetOverlappingBodies` function and upload mouse position every physic frame → not possible for touch input (update `MouseArea` position only on touch); zero lenght raycast works strange with non-rectangular collision shape; Mobile version uses directly `Physics2DDirectSpaceState.IntersectPoint(GetGlobalMousePosition(),...)` → `MouseArea` not needed
+* In `Main` added `ReturnTopObject` delegate and `_returnTopObject` private member of type `ReturnTopObject`: on ready sets  `_returnTopObject` to `ReturnTopObjectMobile` or `ReturnTopObjectDesktop` depending on `OS.HasTouchscreenUiHint()` value
+* Change some scale factor/size of collsion shape of objects: they were too small for touch input (at least using my fingers...on my terrible phone...)
+* Begun to think graphics/theme/colors stuff: blocknotes theme/doodle theme
+* Add touch support for rotation input (NOT ELEGANT solution but it works, added a strange branch in `Main` input handler function only for rotatable object): mouse_entered and mouse_exited does not work with touch → only for `IRotatable` objects in `Main` first check with `Physics2DDirectSpaceState.IntersectPoint(GetGlobalMousePosition(),...)` if you are clicking on a `RotationArea`, if true then set `_rotatable` member of selected object to true
+* Added some utility functions (`ObjectInterfaces` struct) and exported variable (for `ScrollGameUI` elements)
