@@ -20,4 +20,5 @@ data_*/
 # Other stuff
 *.drawio
 Private/
-Godot_NeedForRegularity/project.godot
+preAssets/
+

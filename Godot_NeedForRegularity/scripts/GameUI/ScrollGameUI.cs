@@ -21,12 +21,18 @@ namespace GameUI
 
         [Signal]
         delegate void FocusingTweenCompleted();
+        [Signal]
+        delegate void FocusingTweenStarted();
 
 
         public async override void _Ready()
         {
 
             _focusingTween = GetNode<Tween>("Tween");
+
+            Main.Main mainNode = (Main.Main)GetTree().GetNodesInGroup("main")[0];
+            Connect(nameof(FocusingTweenStarted), mainNode, "_on_ScrollGameUI_FocusingTweenStarted");
+            Connect(nameof(FocusingTweenCompleted), mainNode, "_on_ScrollGameUI_FocusingTweenCompleted");
 
             _hbox = GetNode<HBoxContainer>("CenterContainer/HBoxContainer");
 
@@ -44,12 +50,22 @@ namespace GameUI
 
         public async void UpdateFocus(ScrollIconGameUI newFocusedButton)
         {
+
+            int currentIndex = _focusedButton.GetIndex();
+            int newIndex = newFocusedButton.GetIndex();
+
             SetUpFocusingTweenButtons(newFocusedButton);
-            SetUpFocusingTweenHBox(newFocusedButton);
+            if (CheckIfValidTranslation(currentIndex, newIndex))
+            {
+                int target = Mathf.Clamp(newIndex, 1, _maxIndex - 1);
+                int initial = Mathf.Clamp(currentIndex, 1, _maxIndex - 1);
+
+                // SetUpFocusingTweenHBox(_buttons[target]);
+                SetUpFocusingTweenHBox(_buttons[target], _buttons[initial]);
+            }
 
             _focusingTween.Start();
             _focusedButton = newFocusedButton;
-            _movable = false;
 
             await ToSignal(this, nameof(FocusingTweenCompleted));
         }
@@ -63,13 +79,21 @@ namespace GameUI
             _focusingTween.InterpolateProperty(newFocusedButton, "rect_scale", newFocusedButton.NotFocusedScale, newFocusedButton.FocusedScale, _tweenSpeed);
 
         }
-        private void SetUpFocusingTweenHBox(ScrollIconGameUI newFocusedButton)
+        private void SetUpFocusingTweenHBox(ScrollIconGameUI target, ScrollIconGameUI initial)
         {
-            float deltaX = (newFocusedButton.RectPosition.x - _focusedButton.RectPosition.x) * _hbox.RectScale.x;
+            float deltaX = (target.RectPosition.x - initial.RectPosition.x) * _hbox.RectScale.x;
             float oldXPos = _hbox.RectPosition.x;
             float newXPos = oldXPos - deltaX;
             _focusingTween.InterpolateProperty(_hbox, "rect_position:x", oldXPos, newXPos, _tweenSpeed);
-
+        }
+        private bool CheckIfValidTranslation(int currentIndex, int newIndex)
+        {
+            return !(
+                    (currentIndex == 0 && newIndex == 1) ||
+                    (currentIndex == 1 && newIndex == 0) ||
+                    (currentIndex == _maxIndex - 1 && newIndex == _maxIndex) ||
+                    (currentIndex == _maxIndex && newIndex == _maxIndex - 1)
+                    );
         }
 
         public void _on_Area2D_input_event(Node _, InputEvent @event, int __)
@@ -83,8 +107,6 @@ namespace GameUI
                     if (@event.IsActionPressed("select") || @event.IsPressed())
                     {
                         _pressed = true;
-
-
                         @event.Dispose();
                         return;
                     }
@@ -95,6 +117,9 @@ namespace GameUI
                         @event.Dispose();
                         return;
                     }
+
+                    @event.Dispose();
+                    return;
                 }
 
                 if (@event is InputEventMouseMotion mouseMotion && _pressed)
@@ -115,14 +140,15 @@ namespace GameUI
                             UpdateFocus(_buttons[currentIndex - 1]);
 
                         }
+                        _pressed = false;
                     }
-
                     mouseMotion.Dispose();
                     return;
                 }
 
             }
             @event.Dispose();
+           
             return;
 
 
@@ -133,5 +159,16 @@ namespace GameUI
             _movable = true;
             EmitSignal(nameof(FocusingTweenCompleted));
         }
+
+        public virtual void _on_Tween_tween_started(object _, NodePath nodePath)
+        {
+            _movable = false;
+            EmitSignal(nameof(FocusingTweenStarted));
+        }
+    
+    
     }
+
+
+    
 }

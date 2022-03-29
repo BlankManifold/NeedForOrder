@@ -14,18 +14,19 @@ namespace GameObjects
         // private float _coefficients.y = 0f;
         private int _width = 8;
         private float _angleDegrees;
+        private float _rotationAreaOffsetAngle = Mathf.Pi / 2;
 
         private Position2D _lineCenterNode;
         private Vector2 _oldLineCenterPos;
+        private Vector2 _rightVector = Vector2.Right;
 
         private Line2D _line;
         private CollisionShape2D _selectionAreaShape;
 
-        private float _delta;
 
 
 
-        public override void InitRandomObject()
+        protected override void InitRandomProperties()
         {
             int offset = _width / 2;
             int positionX = Globals.RandomManager.rng.RandiRange(offset, (int)Globals.ScreenInfo.PlayableSize[0] - offset);
@@ -38,7 +39,6 @@ namespace GameObjects
             _m = Mathf.Tan(_angleDegrees);
             RelevantPosition = Vector2.Zero;
             RelevantRotationAngle = _angleDegrees;
-
         }
         public override void RandomizeObject()
         {
@@ -50,35 +50,24 @@ namespace GameObjects
         public override void _Ready()
         {
             _overlappaple = true;
+            _checkingRotationAreaAngle = Mathf.Pi;
 
-            base._Ready();
 
             _line = GetNode<Line2D>("Line2D");
             _selectionAreaShape = GetNode<CollisionShape2D>("SelectionAreaShape");
             _selectionAreaShape.Shape = (RectangleShape2D)_selectionAreaShape.Shape.Duplicate();
 
             _lineCenterNode = GetNode<Position2D>("LineCenter");
+
+            base._Ready();
+
             UpdateAll();
 
+            _oldLineCenterPos = _lineCenterNode.GlobalPosition;
             RelevantPosition = Vector2.Zero;
             RelevantRotationAngle = _angleDegrees;
         }
-        public override void _Process(float delta)
-        {
-            base._Process(delta);
 
-            if (_state >= Globals.OBJECTSTATE.SELECTED)
-                _line.DefaultColor = new Color(0, 0, 0);
-
-            else
-                _line.DefaultColor = new Color(1, 1, 1);
-
-            if (_imOnRotationArea)
-                _rotationArea.Modulate = new Color(0, 0, 0);
-            else
-                _rotationArea.Modulate = new Color(1, 1, 1);
-
-        }
 
 
 
@@ -108,9 +97,10 @@ namespace GameObjects
         {
             Vector2 oldCoefficient = _coefficients;
             Vector2 direction = _coefficients.DirectionTo(RelevantPosition);
-            float speed = _coefficients.DistanceTo(RelevantPosition);
+            float speed = _coefficients.DistanceTo(RelevantPosition) * _quickness;
 
             _coefficients += direction * speed;
+            // _coefficients = _coefficients.LinearInterpolate(RelevantPosition, 1f);
 
             UpdateAll();
 
@@ -128,18 +118,7 @@ namespace GameObjects
         }
         public override void RotateObject()
         {
-            float oldRotation = _angleDegrees;
             _angleDegrees = RelevantRotationAngle;
-
-            KinematicCollision2D rotationAreaCollision = _rotationArea.MoveAndCollide(Vector2.Zero, testOnly: true);
-
-            if (CheckRotationCollision(rotationAreaCollision))
-            {
-                _rotationArea.GlobalPosition = _oldLineCenterPos + _rotationAreaInitialPos;
-                _angleDegrees = oldRotation;
-                return;
-            }
-
             _m = Mathf.Tan(_angleDegrees);
             UpdateIntersectionPoints();
             UpdateShape();
@@ -155,45 +134,37 @@ namespace GameObjects
         {
             float lerpWeight = 0.4f;
 
-            Vector2 referencePos = _rotationArea.GlobalPosition - _oldLineCenterPos;
+            Vector2 referencePos = _clickedRotationAreaRelativePosition + _rotationArea.GlobalPosition - _oldLineCenterPos;
             Vector2 currentPos = positionToFollow - _oldLineCenterPos;
             float deltaAngle = Mathf.LerpAngle(0, referencePos.AngleTo(currentPos), lerpWeight);
 
-            _delta = deltaAngle;
+            float oldRotation = RelevantRotationAngle;
+            RelevantRotationAngle = (_angleDegrees + deltaAngle) % (2 * Mathf.Pi);
+            
+            UpdateRotationArea(_oldLineCenterPos);
 
-            Vector2 oldRotationAreaPosition = _rotationArea.GlobalPosition;
-            _rotationArea.GlobalPosition = _oldLineCenterPos + referencePos.Rotated(deltaAngle);
-
-            KinematicCollision2D rotationAreaCollision = _rotationArea.MoveAndCollide(Vector2.Zero, testOnly: true);
+            KinematicCollision2D rotationAreaCollision = _rotationCollisionArea.MoveAndCollide(Vector2.Zero, testOnly: true);
             if (CheckRotationCollision(rotationAreaCollision))
             {
-                _rotationArea.GlobalPosition = oldRotationAreaPosition;
-                deltaAngle = 0f;
+                RelevantRotationAngle = oldRotation;
+                UpdateRotationArea(_oldLineCenterPos);
+                return;
             }
-
-            RelevantRotationAngle = (_angleDegrees + deltaAngle) % (2 * Mathf.Pi);
 
             if (_rotationSnappable)
             {
                 if (SetUpRotationSnappping())
                 {
-                    _rotationArea.GlobalPosition = oldRotationAreaPosition;
+                    UpdateRotationArea(_oldLineCenterPos);
                 }
             }
         }
-        private void SetUpCoefficientsForRotation()
-        {
-            _coefficients = _oldLineCenterPos;
-        }
-
+       
 
 
         protected override void InputRotationPressed()
         {
-
-            _oldLineCenterPos = _lineCenterNode.GlobalPosition;
-            SetUpCoefficientsForRotation();
-
+            _coefficients = _oldLineCenterPos;
         }
         protected override void InputRotationReleased()
         {
@@ -205,8 +176,11 @@ namespace GameObjects
             setupFollowMouse(mouseMotion.Relative);
             CheckRotationAreaCollision(_lineCenterNode.GlobalPosition);
         }
-        protected override void InputMovementPressed(InputEventMouseButton _) { }
-
+        protected override void InputMovementPressed(InputEventMouseButton _) {}
+        protected override void InputMovementReleased() 
+        {
+            _oldLineCenterPos = _lineCenterNode.GlobalPosition;
+        }
 
 
         private void UpdateIntersectionPoints()
@@ -287,43 +261,50 @@ namespace GameObjects
             shape.Extents = new Vector2(shape.Extents.x, _lineCenterNode.GlobalPosition.DistanceTo(_line.Points[0]));
 
         }
-        private void UpdateRotationArea()
+        private void UpdateRotationArea(Vector2 pivotPoint)
         {
-            _rotationArea.GlobalPosition = _lineCenterNode.GlobalPosition + _rotationAreaInitialPos;
+            //_rotationArea.GlobalPosition = _lineCenterNode.GlobalPosition + _rotationAreaInitialPos;
+            _rotationArea.GlobalPosition = pivotPoint + _rightVector.Rotated(_rotationAreaOffsetAngle + RelevantRotationAngle) * _rotationRadius;
+            _rotationArea.GlobalRotation = _rotationAreaOffsetAngle + RelevantRotationAngle;
+
         }
         private void UpdateAll()
         {
             UpdateIntersectionPoints();
             UpdateShape();
-            UpdateRotationArea();
+            UpdateRotationArea(_lineCenterNode.GlobalPosition);
         }
         protected override void UpdateRotationAreaInitialPos(Vector2 referencePos)
         {
             _rotationAreaInitialPos = _rotationArea.GlobalPosition - referencePos;
+            _rotationAreaOffsetAngle += _checkingRotationAreaAngle; 
         }
         public override void UpdateToValidPosition()
         {
             UpdateAll();
+        }
+        protected override void UpdateColor()
+        {
+            _line.SelfModulate = _color;
         }
 
 
         public override string InfoString()
         {
             string text = $"STATE: {_state}";
-            text += $"\nInRotationArea: {_imOnRotationArea}\nRotatable: {_rotatable}";
-            text += $"\nSize: {GetViewport().GetVisibleRect().Size}";
-            text += $"\nRotation: {GlobalRotationDegrees}";
-            text += $"\nGlobal: {GlobalPosition}";
+            // text += $"\nInRotationArea: {_imOnRotationArea}\nRotatable: {_rotatable}";
+            // text += $"\nSize: {GetViewport().GetVisibleRect().Size}";
+            // text += $"\nRotation: {GlobalRotationDegrees}";
+            // text += $"\nGlobal: {GlobalPosition}";
             text += $"\nArea Local: {_rotationArea.Position}";
             text += $"\nArea Global: {_rotationArea.GlobalPosition}";
-            text += $"\nHasPoint: {GetViewport().GetVisibleRect().HasPoint(_rotationArea.GlobalPosition)}";
+            // text += $"\nHasPoint: {GetViewport().GetVisibleRect().HasPoint(_rotationArea.GlobalPosition)}";
             text += $"\n AngleDegrees: {_angleDegrees}";
-            text += $"\n _m: {_m}";
-            text += $"\n _delta: {_delta}";
-            text += $"\n RelativePos: {GetLocalMousePosition() - _oldLineCenterPos}";
+            text += $"\n AngleDegrees: {RelevantRotationAngle}";
+            // text += $"\n _m: {_m}";
+            // text += $"\n RelativePos: {GetLocalMousePosition() - _oldLineCenterPos}";
             text += $"\n CurrentPivot:  {_oldLineCenterPos}";
             text += $"\n CurrentCenter:  {_lineCenterNode.GlobalPosition}";
-            // text += $"\n Angle:{Mathf.Rad2Deg(_check.Position.AngleTo(_rotationArea.Position))}";
 
             return text;
         }

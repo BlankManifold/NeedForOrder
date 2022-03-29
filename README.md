@@ -91,3 +91,18 @@ and (maybe?) save the configurations you created. You can also choose to use a b
 * Begun to think graphics/theme/colors stuff: blocknotes theme/doodle theme
 * Add touch support for rotation input (NOT ELEGANT solution but it works, added a strange branch in `Main` input handler function only for rotatable object): mouse_entered and mouse_exited does not work with touch → only for `IRotatable` objects in `Main` first check with `Physics2DDirectSpaceState.IntersectPoint(GetGlobalMousePosition(),...)` if you are clicking on a `RotationArea`, if true then set `_rotatable` member of selected object to true
 * Added some utility functions (`ObjectInterfaces` struct) and exported variable (for `ScrollGameUI` elements)
+
+
+### 27/03/2022
+* Add color on/off button: `ColorButton` object
+* Connected color change to save system: save color option in background-save file
+* `ScrollBackground` now automatically updates to correct icon when type or number of objects is changed
+* Created basic tile for the background patterns and added a offset variable to center the different patterns relative to each others 
+* Created `ColorObject` function in `BaseObject` and refactored in a more object-oriented way `InitRandomObject`/`RandomizeObject`; and a corrisponding `ColorObjects` in `Main`
+* Added in `Globals` a static class for the main object colors: `Globals.Colors`
+* Add some basic/terrible graphics (created using [Krita](https://krita.org/en/)): icon of tile for background patterns, background patterns tile, randomize button, color button, vertical line, setting icon, objects textures, settings panel and `GameUI` panel (post-it), `RotationArea` icon
+* Copy and past [this shader](https://www.gdquest.com/tutorial/godot/shaders/gradient-map/) from a GDQuest's tutorial: color on/off of color button, if off set to a gray-scale-ish
+* Some fixes and refactoring of: problem with line collision shape size and input event of `GameUI`; problem with tween completed/started of `GameUI` and gamestate flow (added `GAMESTATE.PAUSED`); save system creates "a lot" of godot's dictionaries "problem" with GC; `RotationArea` is always the top shape when object selected; `RotationArea` spawn position; ads frequency; double touch moving from `GameUI` to `PlayableSize` area; problem with `LineObject` rotation
+* `SettingsPanel`: allow to change default/base color and display version number; post-it theme; connected with `Main`
+* Small refactoring of `RotationArea` collision detection with `LevelBarriers`
+

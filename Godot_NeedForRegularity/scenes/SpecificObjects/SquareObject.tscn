@@ -2,39 +2,26 @@
 
 [ext_resource path="res://scripts/Objects/SpecificObjects/SquareObject.cs" type="Script" id=1]
 [ext_resource path="res://scenes/BaseObjects/RotatableObject.tscn" type="PackedScene" id=2]
+[ext_resource path="res://assets/objects/square2.png" type="Texture" id=3]
 
-[sub_resource type="RectangleShape2D" id=1]
+[sub_resource type="RectangleShape2D" id=3]
 extents = Vector2( 64, 64 )
-
-[sub_resource type="CircleShape2D" id=2]
-radius = 30.0
 
 [node name="SquareObject" instance=ExtResource( 2 )]
 script = ExtResource( 1 )
 _lenght = 128
 
-[node name="ColorRect" type="ColorRect" parent="." index="0"]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
+[node name="TextureRect" type="TextureRect" parent="." index="0"]
 margin_left = -64.0
 margin_top = -64.0
 margin_right = 64.0
 margin_bottom = 64.0
 mouse_filter = 2
+texture = ExtResource( 3 )
+expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="SelectionAreaShape" parent="." index="1"]
-shape = SubResource( 1 )
-
-[node name="RotationArea" parent="." index="2"]
-position = Vector2( 90, 90 )
-
-[node name="ColorRect" parent="RotationArea" index="0"]
-mouse_filter = 2
-
-[node name="CollisionShape2D" parent="RotationArea" index="1"]
-shape = SubResource( 2 )
+shape = SubResource( 3 )

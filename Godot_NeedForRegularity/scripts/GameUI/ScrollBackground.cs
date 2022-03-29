@@ -6,7 +6,7 @@ namespace GameUI
     {
 
         [Signal]
-        delegate void BackgroundChanged(Texture textureTile, uint backgroundNumber);
+        delegate void BackgroundChanged(Texture textureTile, int backgroundNumber, Vector2 offset);
 
 
         public override void _Ready()
@@ -22,7 +22,7 @@ namespace GameUI
             base._on_Tween_tween_all_completed();
             
             ScrollBackgroundIconGameUI selectedIcon = (ScrollBackgroundIconGameUI)_focusedButton;
-            EmitSignal(nameof(BackgroundChanged), selectedIcon.TextureTile, selectedIcon.GetIndex());
+            EmitSignal(nameof(BackgroundChanged), selectedIcon.TextureTile, selectedIcon.GetIndex(), selectedIcon.Offset);
         }
     }
 }

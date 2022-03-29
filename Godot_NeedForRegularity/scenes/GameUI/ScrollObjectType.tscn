@@ -1,36 +1,50 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://scenes/GameUI/ScrollGameUI.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scripts/GameUI/ScrollIconGameUI.cs" type="Script" id=2]
-[ext_resource path="res://assets/gameUI/square.png" type="Texture" id=3]
+[ext_resource path="res://assets/objects/square2.png" type="Texture" id=3]
 [ext_resource path="res://scripts/GameUI/ScrollObjectType.cs" type="Script" id=4]
+[ext_resource path="res://assets/objects/circle.png" type="Texture" id=5]
+[ext_resource path="res://assets/gameUI/lineIcon3.png" type="Texture" id=6]
 
 [node name="ScrollObjectType" instance=ExtResource( 1 )]
-margin_left = -360.0
+margin_left = -132.5
+margin_top = -164.0
+margin_right = 132.5
+margin_bottom = -64.0
 script = ExtResource( 4 )
 _initialIndex = 1
 
 [node name="CenterContainer" parent="." index="1"]
-margin_left = 217.0
-margin_top = 43.0
-margin_right = 502.0
-margin_bottom = 143.0
-rect_min_size = Vector2( 285, 100 )
+margin_left = 10.0
+margin_right = 255.0
 
 [node name="CollisionShape2D" parent="CenterContainer/Area2D" index="0"]
-position = Vector2( 507, 145 )
+position = Vector2( 344, 94 )
 
 [node name="HBoxContainer" parent="CenterContainer" index="1"]
-anchor_top = 0.5
-anchor_bottom = 0.5
-margin_left = 16.0
-margin_top = -38.0
-margin_right = 720.0
-margin_bottom = 121.0
+margin_left = -118.5
+margin_top = -40.0
+margin_right = 669.5
+margin_bottom = 216.0
+rect_scale = Vector2( 0.3, 0.3 )
 
-[node name="CircleIcon" type="TextureRect" parent="CenterContainer/HBoxContainer" index="0" groups=["UIButton"]]
-margin_right = 161.0
-margin_bottom = 159.0
+[node name="DotIcon" type="TextureRect" parent="CenterContainer/HBoxContainer" index="0" groups=["ObjectIcon"]]
+self_modulate = Color( 0, 0.0588235, 0.333333, 1 )
+margin_right = 256.0
+margin_bottom = 256.0
+mouse_filter = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource( 5 )
+stretch_mode = 5
+script = ExtResource( 2 )
+
+[node name="SquareIcon" type="TextureRect" parent="CenterContainer/HBoxContainer" index="1" groups=["ObjectIcon"]]
+self_modulate = Color( 0, 0.0588235, 0.333333, 1 )
+margin_left = 266.0
+margin_right = 522.0
+margin_bottom = 256.0
 mouse_filter = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -39,97 +53,15 @@ stretch_mode = 5
 script = ExtResource( 2 )
 _objectType = 1
 
-[node name="Label" type="Label" parent="CenterContainer/HBoxContainer/CircleIcon" index="0"]
-self_modulate = Color( 0, 0, 0, 1 )
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -20.0
-margin_top = -7.0
-margin_right = 20.0
-margin_bottom = 7.0
-text = "CIRCLE"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="SquareIcon" type="TextureRect" parent="CenterContainer/HBoxContainer" index="1" groups=["UIButton"]]
-margin_left = 181.0
-margin_right = 342.0
-margin_bottom = 159.0
+[node name="LineIcon" type="TextureRect" parent="CenterContainer/HBoxContainer" index="2" groups=["ObjectIcon"]]
+self_modulate = Color( 0, 0.0588235, 0.333333, 1 )
+margin_left = 532.0
+margin_right = 788.0
+margin_bottom = 256.0
 mouse_filter = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-texture = ExtResource( 3 )
-stretch_mode = 5
-script = ExtResource( 2 )
-_objectType = 1
-
-[node name="Label" type="Label" parent="CenterContainer/HBoxContainer/SquareIcon" index="0"]
-self_modulate = Color( 0, 0, 0, 1 )
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -20.0
-margin_top = -7.0
-margin_right = 20.0
-margin_bottom = 7.0
-text = "SQUARE"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="DotIcon" type="TextureRect" parent="CenterContainer/HBoxContainer" index="2" groups=["UIButton"]]
-margin_left = 362.0
-margin_right = 523.0
-margin_bottom = 159.0
-mouse_filter = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-texture = ExtResource( 3 )
-stretch_mode = 5
-script = ExtResource( 2 )
-
-[node name="Label" type="Label" parent="CenterContainer/HBoxContainer/DotIcon" index="0"]
-self_modulate = Color( 0, 0, 0, 1 )
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -20.0
-margin_top = -7.0
-margin_right = 20.0
-margin_bottom = 7.0
-text = "DOT"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="LineIcon" type="TextureRect" parent="CenterContainer/HBoxContainer" index="3" groups=["UIButton"]]
-margin_left = 543.0
-margin_right = 704.0
-margin_bottom = 159.0
-mouse_filter = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-texture = ExtResource( 3 )
+texture = ExtResource( 6 )
 stretch_mode = 5
 script = ExtResource( 2 )
 _objectType = 2
-
-[node name="Label" type="Label" parent="CenterContainer/HBoxContainer/LineIcon" index="0"]
-self_modulate = Color( 0, 0, 0, 1 )
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -20.0
-margin_top = -7.0
-margin_right = 20.0
-margin_bottom = 7.0
-text = "LINE"
-__meta__ = {
-"_edit_use_anchors_": false
-}

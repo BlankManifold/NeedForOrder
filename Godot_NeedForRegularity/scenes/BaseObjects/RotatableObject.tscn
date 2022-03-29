@@ -1,32 +1,50 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://scenes/BaseObjects/BaseObject.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scripts/Objects/BaseObjects/RotatableObject.cs" type="Script" id=2]
+[ext_resource path="res://assets/objects/rotationAreaIcon3.png" type="Texture" id=3]
 
-[sub_resource type="CircleShape2D" id=1]
-radius = 30.0
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 20, 40 )
+
+[sub_resource type="CircleShape2D" id=2]
+radius = 5.0
 
 [node name="RotatableObject" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 _rotationAreaInitialPos = Vector2( 90, 90 )
 
-[node name="RotationArea" type="KinematicBody2D" parent="." index="1" groups=["RotationArea"]]
+[node name="RotationArea" type="KinematicBody2D" parent="." index="2" groups=["RotationArea"]]
+position = Vector2( 90, 90 )
+rotation = 0.785398
+scale = Vector2( 1, 1 )
 collision_layer = 16
-collision_mask = 2
+collision_mask = 0
 input_pickable = true
 
-[node name="ColorRect" type="ColorRect" parent="RotationArea" index="0"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RotationArea" index="0"]
+shape = SubResource( 1 )
+
+[node name="RotationAreaIcon" type="TextureRect" parent="RotationArea" index="1"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -7.0
-margin_top = -7.0
-margin_right = 7.0
-margin_bottom = 7.0
+margin_left = -32.0
+margin_top = -32.0
+margin_right = 32.0
+margin_bottom = 32.0
+rect_rotation = 135.0
+rect_pivot_offset = Vector2( 32, 32 )
+mouse_filter = 2
+texture = ExtResource( 3 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RotationArea" index="1"]
-shape = SubResource( 1 )
+[node name="RotationCollisionArea" type="KinematicBody2D" parent="RotationArea" index="2"]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RotationArea/RotationCollisionArea" index="0"]
+shape = SubResource( 2 )

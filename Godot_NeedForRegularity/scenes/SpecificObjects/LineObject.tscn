@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://scenes/BaseObjects/RotatableObject.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scripts/Objects/SpecificObjects/LineObject.cs" type="Script" id=2]
+[ext_resource path="res://assets/objects/line.png" type="Texture" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 25, 0 )
@@ -10,21 +11,21 @@ extents = Vector2( 25, 0 )
 collision_layer = 64
 collision_mask = 0
 script = ExtResource( 2 )
+_quickness = 1.05
 _rotationAreaInitialPos = Vector2( 70, 70 )
 
 [node name="SelectionAreaShape" parent="." index="0"]
 shape = SubResource( 1 )
 
-[node name="RotationArea" parent="." index="1"]
+[node name="RotationArea" parent="." index="2"]
 position = Vector2( 70, 70 )
-
-[node name="ColorRect" parent="RotationArea" index="0"]
-mouse_filter = 2
+rotation = 0.0
 
 [node name="Line2D" type="Line2D" parent="." index="3"]
-position = Vector2( 0, 1 )
-points = PoolVector2Array( 0, 0, 0, 0 )
-width = 8.0
-default_color = Color( 0.4, 0.501961, 1, 1 )
+points = PoolVector2Array( 0, 0, 100, 0 )
+width = 170.0
+default_color = Color( 1, 1, 1, 1 )
+texture = ExtResource( 3 )
+texture_mode = 1
 
 [node name="LineCenter" type="Position2D" parent="." index="4"]

@@ -16,11 +16,14 @@ namespace GameObjects
 
 
         protected KinematicBody2D _rotationArea;
+        protected KinematicBody2D _rotationCollisionArea;
         protected CollisionShape2D _rotationAreaShape;
 
         [Export]
         protected Vector2 _rotationAreaInitialPos;
         protected float _rotationRadius;
+        protected Vector2 _clickedRotationAreaRelativePosition;
+        protected float _checkingRotationAreaAngle;
         // protected CollisionShape2D _rotationRadiusShape;
 
         public float RelevantRotationAngle { get; set; } = 0f;
@@ -37,9 +40,8 @@ namespace GameObjects
 
         public override void _Ready()
         {
-            base._Ready();
-
             _rotationArea = (KinematicBody2D)FindNode("RotationArea");
+            _rotationCollisionArea = (KinematicBody2D)FindNode("RotationCollisionArea");
             _rotationAreaShape = _rotationArea.GetNode<CollisionShape2D>("CollisionShape2D");
 
             _rotationArea.Position = _rotationAreaInitialPos;
@@ -47,6 +49,8 @@ namespace GameObjects
             _rotationAreaShape.Disabled = true;
             _rotationRadius = _rotationAreaInitialPos.Length();
             RelevantRotationAngle = GlobalRotation;
+         
+            base._Ready();
         }
 
 
@@ -83,6 +87,8 @@ namespace GameObjects
                 // IF ON ROTATION AREA -> CHECK IF U WANT TO ROTATE
                 else
                     HandleRotationInput(@event);
+
+                //@event.Dispose();    
                 return;
             }
 
@@ -96,12 +102,6 @@ namespace GameObjects
                     _state = Globals.OBJECTSTATE.SELECTED;
                     s_someonePressed = false;
 
-                    // if (!_imOnRotationArea)
-                    // {
-                    //     _rotatable = false;
-                    //     s_selectable = true;
-                    // }
-
                     InputRotationReleased();
 
                     mouseButtonEvent.Dispose();
@@ -113,9 +113,8 @@ namespace GameObjects
                     if (_state != Globals.OBJECTSTATE.ROTATING)
                     {
                         _state = Globals.OBJECTSTATE.ROTATING;
-
                     }
-
+        
                     InputRotationPressed();
                     mouseButtonEvent.Dispose();
                     return;
@@ -126,7 +125,7 @@ namespace GameObjects
             {
                 if (_state == Globals.OBJECTSTATE.ROTATING)
                 {
-                    SetUpRotation(GetLocalMousePosition());
+                    SetUpRotation(GetGlobalMousePosition());
                 }
                 @event.Dispose();
                 return;
@@ -152,7 +151,7 @@ namespace GameObjects
             GlobalRotation = RelevantRotationAngle;
 
             KinematicCollision2D mainObjectCollision = MoveAndCollide(Vector2.Zero, testOnly: true);
-            KinematicCollision2D rotationAreaCollision = _rotationArea.MoveAndCollide(Vector2.Zero, testOnly: true);
+            KinematicCollision2D rotationAreaCollision = _rotationCollisionArea.MoveAndCollide(Vector2.Zero, testOnly: true);
 
             if (CheckRotationCollision(mainObjectCollision) || CheckRotationCollision(rotationAreaCollision))
             {
@@ -164,23 +163,35 @@ namespace GameObjects
         public override void SelectObject()
         {
             base.SelectObject();
-            _rotationArea.Visible = true;
+
             _rotationAreaShape.Disabled = false;
+            _rotationArea.ZIndex = 1;
+            
+            CheckRotationAreaCollision(GlobalPosition);
+            _rotationArea.Visible = true;
         }
         public override void UnSelectObject()
         {
             base.UnSelectObject();
+
             _rotationArea.Visible = false;
+            _rotationArea.ZIndex = 0;
             _rotationAreaShape.Disabled = true;
         }
-
+        public virtual void ClickedOnRotationArea(InputEventMouseButton mouseButtonEvent)
+        {
+            _clickedRotationAreaRelativePosition = mouseButtonEvent.Position - _rotationArea.GlobalPosition;
+            _rotatable = true;
+            BaseObject.s_someonePressed = true;
+        }
 
 
         protected virtual void SetUpRotation(Vector2 positionToFollow)
         {
             float lerpWeight = 0.4f;
 
-            RelevantRotationAngle = GlobalRotation + Mathf.LerpAngle(0, _rotationAreaInitialPos.AngleTo(positionToFollow), lerpWeight);
+            Vector2 referencePos = _rotationArea.GlobalPosition + _clickedRotationAreaRelativePosition - GlobalPosition;
+            RelevantRotationAngle = GlobalRotation + Mathf.LerpAngle(0, referencePos.AngleTo(positionToFollow-GlobalPosition), lerpWeight);
 
             if (_rotationSnappable)
                 SetUpRotationSnappping();
@@ -218,7 +229,7 @@ namespace GameObjects
         }
         protected void CheckRotationAreaCollision(Vector2 referencePos)
         {
-            KinematicCollision2D collisionInfo = _rotationArea.MoveAndCollide(Vector2.Zero, testOnly: true);
+            KinematicCollision2D collisionInfo = _rotationCollisionArea.MoveAndCollide(Vector2.Zero, testOnly: true);
 
             if (collisionInfo != null)
             {
@@ -226,13 +237,15 @@ namespace GameObjects
                 Vector2 intialDirection = referencePos.DirectionTo(_rotationArea.GlobalPosition);
                 Vector2 dilatetedPos = _rotationArea.GlobalPosition + intialDirection * 20f;
                 Vector2 checkingPos = dilatetedPos;
-                for (int i = 1; i <= 3; i++)
+
+                for (int i = 1; i <= (int)(2*Mathf.Pi / _checkingRotationAreaAngle); i++)
                 {
-                    checkingPos = referencePos + (checkingPos - referencePos).Rotated(Mathf.Pi / 2);
+                    checkingPos = referencePos + (checkingPos - referencePos).Rotated(_checkingRotationAreaAngle);
 
                     if (Globals.ScreenInfo.VisibleRect.HasPoint(checkingPos))
                     {
                         _rotationArea.GlobalPosition = referencePos + referencePos.DirectionTo(checkingPos) * _rotationRadius;
+                        _rotationArea.Rotation += i * _checkingRotationAreaAngle;
                         UpdateRotationAreaInitialPos(referencePos);
                         break;
                     }
@@ -251,13 +264,13 @@ namespace GameObjects
         public override string InfoString()
         {
             string text = $"STATE: {_state}";
-            text += $"\nInRotationArea: {_imOnRotationArea}\nRotatable: {_rotatable}";
-            text += $"\nSize: {GetViewport().GetVisibleRect().Size}";
-            text += $"\nRotation: {GlobalRotationDegrees}";
-            text += $"\nGlobal: {GlobalPosition}";
-            text += $"\nArea Local: {_rotationArea.Position}";
-            text += $"\nArea Global: {_rotationArea.GlobalPosition}";
-            text += $"\nHasPoint: {GetViewport().GetVisibleRect().HasPoint(_rotationArea.GlobalPosition)}";
+            // text += $"\nInRotationArea: {_imOnRotationArea}\nRotatable: {_rotatable}";
+            // text += $"\nSize: {GetViewport().GetVisibleRect().Size}";
+            // text += $"\nRotation: {GlobalRotationDegrees}";
+            // text += $"\nGlobal: {GlobalPosition}";
+            // text += $"\nArea Local: {_rotationArea.Position}";
+            // text += $"\nArea Global: {_rotationArea.GlobalPosition}";
+            // text += $"\nHasPoint: {GetViewport().GetVisibleRect().HasPoint(_rotationArea.GlobalPosition)}";
             // text += $"\n CheckingPos: {_check.GlobalPosition}";
             // text += $"\n Angle:{Mathf.Rad2Deg(_check.Position.AngleTo(_rotationArea.Position))}";
 

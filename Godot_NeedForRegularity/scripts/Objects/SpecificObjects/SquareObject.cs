@@ -1,4 +1,5 @@
 using Godot;
+using System;
 
 
 namespace GameObjects
@@ -8,21 +9,11 @@ namespace GameObjects
     {
         [Export]
         private int _lenght;
-        public int Lenght
-        {
-            get { return _lenght; }
-            private set
-            {
-                _lenght = value;
-                _colorRect.RectSize = new Vector2(_lenght, _lenght);
-            }
-        }
+    
+        private TextureRect _textureRect;
+        
 
-        private ColorRect _colorRect;
-        // private Label _label;
-
-
-        public override void InitRandomObject()
+        protected override void InitRandomProperties()
         {
             int offset = (int)(_lenght/Mathf.Sqrt2) + 1;
             int positionX = Globals.RandomManager.rng.RandiRange(offset, (int)Globals.ScreenInfo.PlayableSize[0] - offset);
@@ -32,32 +23,21 @@ namespace GameObjects
 
             GlobalPosition = new Vector2(positionX, positionY);
             GlobalRotationDegrees = angleDegrees;
-            RelevantRotationAngle = Mathf.Deg2Rad(angleDegrees);
+            RelevantRotationAngle = Mathf.Deg2Rad(angleDegrees); 
         }
+        protected override void UpdateColor()
+        {
+            _textureRect.SelfModulate = _color;
+        }
+
 
         public override void _Ready()
         {
-            base._Ready();
-            _colorRect = GetNode<ColorRect>("ColorRect");
-            _colorRect.RectSize = new Vector2(_lenght, _lenght);
-        }
-
-
-        public override void _Process(float delta)
-        {
-            base._Process(delta);
-
-            if (_state >= Globals.OBJECTSTATE.SELECTED)
-                _colorRect.SelfModulate = new Color(0, 0, 0);
+            _textureRect = GetNode<TextureRect>("TextureRect");
+            _textureRect.RectSize = new Vector2(_lenght, _lenght);
+            _checkingRotationAreaAngle = Mathf.Pi / 2;
             
-            else
-                _colorRect.SelfModulate = new Color(1, 1, 1);
-
-            if (_imOnRotationArea)
-                _rotationArea.Modulate = new Color(0, 0, 0);
-            else
-                _rotationArea.Modulate = new Color(1, 1, 1);
-
+            base._Ready();
         }
 
 

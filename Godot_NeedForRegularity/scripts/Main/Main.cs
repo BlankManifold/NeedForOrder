@@ -1,6 +1,7 @@
 using Godot;
 using GameObjects;
 using Globals;
+using System;
 
 namespace Main
 {
@@ -10,19 +11,22 @@ namespace Main
         private GAMESTATE _gamestate = GAMESTATE.IDLE;
         private OBJECTTYPE _objectType = OBJECTTYPE.SQUARE;
         private ObjectsInterfaces _objectInterfaces = new ObjectsInterfaces();
-        private uint _objectsNumber = 3;
+        private uint _objectsNumber = 10;
+        public static bool ColorOn = false;
+        private bool _objectPressed = false;
 
-        private uint _backgroundNumber = 1;
+        private int _backgroundNumber = 1;
 
         private Node _objectsContainer;
         private Area2D _mouseArea;
         private Label _label;
         private GameUI.GameUI _gameUI;
-        private Godot.Collections.Array<GameUI.ScrollIconGameUI> _UIButtons;
+        private Godot.Collections.Array<TextureButton> _UIButtons;
 
         private TextureRect _backgroundTile;
         private HBoxContainer _backgroundContainer;
         private Node2D _adsHandler;
+        private GameUI.SettingsPanel _settingsPanel;
 
 
 
@@ -59,7 +63,8 @@ namespace Main
             GetViewport().Connect("size_changed", this, nameof(_on_viewport_size_changed));
 
             _gameUI = GetNode<GameUI.GameUI>("GameUILayer/GameUI");
-            _UIButtons = new Godot.Collections.Array<GameUI.ScrollIconGameUI>(GetTree().GetNodesInGroup("UIButton"));
+            _settingsPanel = GetNode<GameUI.SettingsPanel>("GameUILayer/SettingsPanel");
+            _UIButtons = new Godot.Collections.Array<TextureButton>(GetTree().GetNodesInGroup("UIButton"));
             _label = GetNode<Label>("Label");
 
             PackedScene levelBarrierScene = (PackedScene)ResourceLoader.Load("res://scenes/BackgroundAndLevel/LevelBarrier.tscn");
@@ -68,7 +73,7 @@ namespace Main
             levelBarrier.YLimitOffset = (int)_gameUI.RectSize.y;
             AddChild(levelBarrier);
 
-            _backgroundTile = GetNode<TextureRect>("BackgroundLayer/PatternTile");
+            _backgroundTile = GetNode<TextureRect>("BackgroundLayer/PatternPanel/PatternTile");
             _backgroundTile.Texture = null;
             _backgroundContainer = _gameUI.GetNode<HBoxContainer>("NinePatchRect/ScrollBackground/CenterContainer/HBoxContainer");
 
@@ -83,6 +88,7 @@ namespace Main
         public override void _PhysicsProcess(float delta)
         {
             UpdateState();
+            UpdateButtonsState();
             _updateChekingPosition();
 
 
@@ -106,22 +112,30 @@ namespace Main
                 case GAMESTATE.IDLE:
                     break;
 
+                case GAMESTATE.PAUSED:
+                    break;
+
             }
         }
         public override void _UnhandledInput(InputEvent @event)
         {
-
             // UPDATE SELECTION ONLY IF BUTTON CLICKED/PRESSED
+            if (_gamestate == GAMESTATE.PAUSED) //|| (!ScreenInfo.CheckIfValidPosition(GetGlobalMousePosition()) && !_objectPressed))
+            {
+                @event.Dispose();
+                return;
+            }
 
             if ((@event is InputEventMouseButton && Input.IsActionJustPressed("select")) || @event.IsPressed())
             {
-
                 if (_objectInterfaces.IRotatable)
                 {
                     if (ClickedOnRotationArea())
                     {
                         RotatableObject rotatableObject = (RotatableObject)BaseObject.s_selectedObject;
-                        rotatableObject.Rotatable = true;
+                        rotatableObject.ClickedOnRotationArea((InputEventMouseButton)@event);
+                        
+                        _objectPressed = true;
                     }
                     else
                     {
@@ -258,7 +272,7 @@ namespace Main
         }
         private void RandomizeObjects(bool isNumberFixed = true)
         {
-            _gamestate = GAMESTATE.IDLE;
+            //_gamestate = GAMESTATE.IDLE;
             if (isNumberFixed)
             {
                 foreach (BaseObject child in _objectsContainer.GetChildren())
@@ -266,6 +280,13 @@ namespace Main
                     child.RandomizeObject();
                 }
 
+            }
+        }
+        private void ColorObjects()
+        {
+            foreach (BaseObject child in _objectsContainer.GetChildren())
+            {
+                child.ColorObject();
             }
         }
         private void LoadObjects(OBJECTTYPE type, uint numberOfObjects)
@@ -293,25 +314,44 @@ namespace Main
         }
         private void LoadBackground(OBJECTTYPE type, uint numberOfObjects)
         {
-            bool areLoaded = SaveSystem.SaveObjectsHandler.LoadBackground(type, numberOfObjects, ref _backgroundNumber);
+
+            SaveSystem.SaveObjectsHandler.SaveBackground(_objectType, _objectsNumber, _backgroundNumber, ColorOn);
+
+            bool areLoaded = SaveSystem.SaveObjectsHandler.LoadBackground(type, numberOfObjects, ref _backgroundNumber, ref ColorOn);
 
             if (!areLoaded)
             {
                 _backgroundNumber = 1;
+                ColorOn = false;
             }
 
             UpdateBackground();
         }
         private void LoadConfiguration(OBJECTTYPE type, uint numberOfObjects)
         {
-            LoadObjects(type, numberOfObjects);
             LoadBackground(type, numberOfObjects);
+            LoadObjects(type, numberOfObjects);
+
+            if (!ColorOn)
+            {
+                ColorObjects();
+            }
         }
 
 
 
         private void UpdateState()
         {
+            // if (!ScreenInfo.CheckIfValidPosition(GetGlobalMousePosition()) && !_objectPressed)
+            // {
+            //     _gamestate = GAMESTATE.PAUSED;
+            //     return;
+            // }
+            if (_gamestate == GAMESTATE.PAUSED)
+            {
+                return;
+            }
+
             if (BaseObject.s_selectedObject != null)
             {
                 switch (BaseObject.s_selectedObject.State)
@@ -331,6 +371,7 @@ namespace Main
             }
 
             _gamestate = GAMESTATE.IDLE;
+
         }
         private void UpdateHoveredAndSelectedObjectTouchFriendly(BaseObject colliderObject)
         {
@@ -388,24 +429,48 @@ namespace Main
         }
         private void UpdateBackground()
         {
-            GameUI.ScrollBackgroundIconGameUI icon = (GameUI.ScrollBackgroundIconGameUI)_backgroundContainer.GetChild((int)_backgroundNumber);
+            GameUI.ScrollBackgroundIconGameUI icon = (GameUI.ScrollBackgroundIconGameUI)_backgroundContainer.GetChild(_backgroundNumber);
             _backgroundTile.Texture = icon.TextureTile;
+            _backgroundTile.RectGlobalPosition = icon.Offset;
 
             GameUI.ScrollGameUI scrollBackground = _gameUI.GetNode<GameUI.ScrollGameUI>("NinePatchRect/ScrollBackground");
             scrollBackground.UpdateFocus(icon);
-        }
 
+            GameUI.ColorButton button = _gameUI.GetNode<GameUI.ColorButton>("NinePatchRect/ColorButton");
+            button.UpdateColorOn(ColorOn);
+        }
+        private void UpdateButtonsState()
+        {
+            if (BaseObject.s_someonePressed != _objectPressed)
+            {
+                _objectPressed = BaseObject.s_someonePressed;
+
+                foreach (TextureButton button in _UIButtons)
+                {
+                    if (_objectPressed)
+                        button.MouseFilter = Control.MouseFilterEnum.Ignore;
+                    else
+                        button.MouseFilter = Control.MouseFilterEnum.Stop;
+                }
+
+            }
+        }
 
 
         public void _on_ScrollGameUI_ObjectTypeChanged(OBJECTTYPE type)
         {
-
             LoadConfiguration(type, _objectsNumber);
-
+            
             _gamestate = GAMESTATE.IDLE;
             _objectType = type;
+            BaseObject.s_selectedObject = null;
 
+            if (_settingsPanel.Visible)
+            {
+                _gamestate = GAMESTATE.PAUSED;
+            }
             //_adsHandler.Call("loadBanner");
+            GC.Collect();
         }
         public void _on_ScrollGameUI_NumberChanged(uint newNumber)
         {
@@ -413,20 +478,68 @@ namespace Main
 
             _gamestate = GAMESTATE.IDLE;
             _objectsNumber = newNumber;
-        }
-        public void _on_ScrollGameUI_BackgroundChanged(Texture textureTile, uint backgroundNumber)
-        {
-            SaveSystem.SaveObjectsHandler.SaveBackground(_objectType, _objectsNumber, backgroundNumber);
+            BaseObject.s_selectedObject = null;
 
-            _gamestate = GAMESTATE.IDLE;
+            if (_settingsPanel.Visible)
+            {
+                _gamestate = GAMESTATE.PAUSED;
+            }
+
+            GC.Collect();
+        }
+        public void _on_ScrollGameUI_BackgroundChanged(Texture textureTile, int backgroundNumber, Vector2 offset)
+        {
+            //_gamestate = GAMESTATE.IDLE;
             _backgroundTile.Texture = textureTile;
+            _backgroundTile.RectGlobalPosition = offset;
             _backgroundNumber = backgroundNumber;
+        }
+        public void _on_ScrollGameUI_FocusingTweenStarted()
+        {
+            _gamestate = GAMESTATE.PAUSED;
+        }
+        public void _on_ScrollGameUI_FocusingTweenCompleted()
+        {
+            if (!_settingsPanel.Visible)
+                _gamestate = GAMESTATE.IDLE;
         }
         public void _on_RandomizeButton_RandomizePressed()
         {
             RandomizeObjects();
 
             _adsHandler.Call("loadBanner");
+        }
+        public void _on_ColorButton_ColorPressed(bool colorOn)
+        {
+            ColorOn = colorOn;
+            ColorObjects();
+        }
+        public void _on_SettingsButton_SettingsPressed()
+        {
+            _settingsPanel.Visible = !_settingsPanel.Visible;
+
+            if (_settingsPanel.Visible)
+            {
+                _gamestate = GAMESTATE.PAUSED;
+                //_adsHandler.Call("loadBanner");
+                return;
+            }
+
+            _gamestate = GAMESTATE.IDLE;
+        }
+        public void _SettingsPanel_ButtonPressed(Color defaultColor)
+        {
+            Globals.Colors.DefaultColor = defaultColor;
+            if (!ColorOn)
+            {
+                ColorObjects();
+            }
+
+            foreach (TextureRect icon in GetTree().GetNodesInGroup("ObjectIcon"))
+            {
+                icon.SelfModulate = defaultColor;
+            }
+
         }
         public void _on_viewport_size_changed()
         {

@@ -1,5 +1,5 @@
 using Godot;
-
+using System;
 
 namespace GameObjects
 {
@@ -13,7 +13,7 @@ namespace GameObjects
 
         public static bool s_someonePressed = false;
         public static BaseObject s_selectedObject = null;
-        // public static BaseObject s_hoveredObject = null;
+        
 
 
         public Vector2 RelevantPosition { get; set; }
@@ -24,6 +24,8 @@ namespace GameObjects
             set { _state = value; }
         }
 
+        protected Color _color;
+        public Color ObjectColor {get { return _color; }}
 
         protected Vector2 _clickedRelativePosition;
         protected Tween _tween;
@@ -39,46 +41,76 @@ namespace GameObjects
         }
         public virtual void InitRandomObject()
         {
+            InitRandomProperties();
+            InitColorObject();
+        }
+        protected virtual void InitRandomProperties()
+        {
             uint positionX = GD.Randi() % (uint)Globals.ScreenInfo.PlayableSize[0];
             uint positionY = GD.Randi() % (uint)Globals.ScreenInfo.PlayableSize[1];
 
             GlobalPosition = new Vector2(positionX, positionY);
         }
+        private void InitColorObject()
+        {
+            if (Main.Main.ColorOn)
+            {
+                _color = Globals.Colors.GetRandomColor();
+                return;
+            }
+
+            _color = Globals.Colors.DefaultColor;
+        }
         public virtual void RandomizeObject()
         {
             InitRandomObject();
+            InitColorObject();
+            UpdateColor();
+        }
+        public void ColorObject()
+        {
+            InitColorObject();
+            UpdateColor();
         }
 
 
 
         public override void _Ready()
         {
+            _tween = GetNode<Tween>("Tween");
+            
+            UpdateColor();
             RelevantPosition = GlobalPosition;
-            // Modulate = new Color(GD.Randf(), GD.Randf(), GD.Randf());
 
             if (!_overlappaple)
             {
                 CollisionMask += 1;
             }
-
-            _tween = GetNode<Tween>("Tween");
         }
 
 
 
         public virtual Godot.Collections.Dictionary<string, object> CreateDict()
         {
+            // Globals.BaseObjectDict.Clear();
+            // Globals.BaseObjectDict.AddBaseObjectData(this);
             Godot.Collections.Dictionary<string, object> dict = new Godot.Collections.Dictionary<string, object>()
             {
                 { "PositionX", Position.x },
                 { "PositionY", Position.y },
+                { "ColorR", _color.r },
+                { "ColorB", _color.b },
+                { "ColorG", _color.g },
+                { "ColorA", _color.a }
             };
 
             return dict;
+            // return Globals.BaseObjectDict.s_dict;
         }
         public virtual void LoadData(Godot.Collections.Dictionary<string, object> data)
         {
             GlobalPosition = new Vector2((float)data["PositionX"], (float)data["PositionY"]);
+            _color = new Color((float)data["ColorR"], (float)data["ColorG"], (float)data["ColorB"], (float)data["ColorA"]);
         }
 
 
@@ -139,7 +171,6 @@ namespace GameObjects
                     return;
                 }
             }
-
         }
         protected virtual void InputMovementMotion(InputEventMouseMotion mouseMotion)
         {
@@ -187,6 +218,10 @@ namespace GameObjects
                 _tween.InterpolateProperty(this, "position", GlobalPosition, newPosition, 0.2f);
                 _tween.Start();
             }
+        }
+        protected virtual void UpdateColor()
+        {
+            Modulate = _color;
         }
         protected virtual Vector2 FindPositionInPlayableArea() { return GlobalPosition; }
 

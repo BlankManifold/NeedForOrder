@@ -4,9 +4,11 @@ namespace GameObjects
 {
     public class DotObject : BaseObject
     {
-        protected int _radius = 30;
+        [Export]
+        protected int _radius = 64;
+        private TextureRect _textureRect;
 
-        public override void InitRandomObject()
+        protected override void InitRandomProperties()
         {
             int offset = _radius + 1;
             int positionX = Globals.RandomManager.rng.RandiRange(offset, (int)Globals.ScreenInfo.PlayableSize[0] - offset);
@@ -15,12 +17,16 @@ namespace GameObjects
             GlobalPosition = new Vector2(positionX, positionY);
         }
 
+
         public override void _Ready()
         {
+            _textureRect = GetNode<TextureRect>("TextureRect");
+            _textureRect.RectSize = new Vector2(2 * _radius, 2 * _radius);
+
             base._Ready();
         }
 
-         protected override Vector2 FindPositionInPlayableArea()
+        protected override Vector2 FindPositionInPlayableArea()
         {
             float offset = _radius;
             if (GlobalPosition.x + offset > Globals.ScreenInfo.PlayableSize.x)
@@ -29,6 +35,11 @@ namespace GameObjects
             }
             return GlobalPosition;
         }
+        protected override void UpdateColor()
+        {
+            _textureRect.SelfModulate = _color;
+        }
+
 
     }
 }

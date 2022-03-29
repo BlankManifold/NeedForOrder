@@ -3,17 +3,17 @@
 [ext_resource path="res://scripts/GameUI/ScrollGameUI.cs" type="Script" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 159, 51 )
+extents = Vector2( 123.5, 51 )
 
 [node name="ScrollGameUI" type="CenterContainer"]
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-margin_left = -359.0
-margin_top = -188.0
-margin_right = 360.0
-margin_bottom = -1.0
+margin_left = -122.5
+margin_top = -156.0
+margin_right = 122.5
+margin_bottom = -56.0
 grow_horizontal = 2
 grow_vertical = 2
 rect_pivot_offset = Vector2( -1059, -1081 )
@@ -27,37 +27,45 @@ __meta__ = {
 pause_mode = 2
 
 [node name="CenterContainer" type="Control" parent="."]
-margin_left = 359.0
-margin_top = 93.0
-margin_right = 359.0
-margin_bottom = 93.0
+margin_right = 245.0
+margin_bottom = 100.0
 grow_horizontal = 2
 grow_vertical = 2
+rect_min_size = Vector2( 245, 100 )
 rect_clip_content = true
 mouse_filter = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
 [node name="Area2D" type="Area2D" parent="CenterContainer"]
-position = Vector2( -359, -93 )
+position = Vector2( -221, -45 )
 collision_layer = 32
 collision_mask = 32
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CenterContainer/Area2D"]
-position = Vector2( 359.5, 94 )
+position = Vector2( 342, 94 )
 shape = SubResource( 1 )
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -197.5
+margin_top = -41.0
+margin_right = -197.5
+margin_bottom = -41.0
 grow_horizontal = 2
 grow_vertical = 2
 rect_scale = Vector2( 0.5, 0.5 )
 mouse_filter = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-custom_constants/separation = 20
+custom_constants/separation = 10
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [connection signal="tween_all_completed" from="Tween" to="." method="_on_Tween_tween_all_completed"]
+[connection signal="tween_started" from="Tween" to="." method="_on_Tween_tween_started"]
 [connection signal="input_event" from="CenterContainer/Area2D" to="." method="_on_Area2D_input_event"]
