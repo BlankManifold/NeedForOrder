@@ -126,14 +126,14 @@ namespace Main
                 return;
             }
 
-            if ((@event is InputEventMouseButton && Input.IsActionJustPressed("select")) || @event.IsPressed())
+            if (@event is InputEventMouseButton mousebutton && mousebutton.ButtonIndex == 1 && mousebutton.IsPressed())
             {
                 if (_objectInterfaces.IRotatable)
                 {
                     if (ClickedOnRotationArea())
                     {
                         RotatableObject rotatableObject = (RotatableObject)BaseObject.s_selectedObject;
-                        rotatableObject.ClickedOnRotationArea((InputEventMouseButton)@event);
+                        rotatableObject.ClickedOnRotationArea(mousebutton);
                         
                         _objectPressed = true;
                     }

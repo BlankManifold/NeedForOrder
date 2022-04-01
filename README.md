@@ -1,18 +1,18 @@
-# NeedForRegularity
+# NeedForOrder
 
 Second attempt at game development using the [Godot engine](https://godotengine.org/) with C#. Another abstract/clean/simple 2D-game without great expectations. 
-Another much needed learnirng project, building on the (little) knowlegde acquired in the making of [StickyBlokcs](https://github.com/NeurodivergentGames/StickyBlocks) (give it a try: [StickyBlocks in itchio](https://neurodivergentgames.itch.io/stickyblocks)).
+Another much needed learnirng project, building on the (little) knowledge acquired in the making of [StickyBlocks](https://github.com/NeurodivergentGames/StickyBlocks) (give it a try: [StickyBlocks in itch.io](https://neurodivergentgames.itch.io/stickyblocks)).
 
 ## Game objective
 
-Reorganize some chaotically placed geometric objects at will following your inner NeedForRegularity. You can 
+Reorganize some chaotically placed geometric objects at will following your inner NeedForOrder. You can 
 choose to reorganize randomally placed lines, squares, dots and disks. There is no specific goal: create your pattern/order, lower the entropy
-and (maybe?) save the configurations you created. You can also choose to use a background (faded) pattern to inspire and facilitate your need for regularity.
+and (maybe?) save the configurations you created. You can also choose to use a background (faded) pattern to inspire and facilitate your need for order.
 ## My goals:
 
 * Build and complete another little abstract game (completely on my own)
 * Learning new Godot specific stuff, for example: better use of collision layer, multi-resolution support, touchscreen inputs support, Android export, place annoying ads in game...
-* Learing new C# stuff, I will try to use more C# specific features even if not necessary or more complex: interfaces, delegates, events(when to use events instead of Godot's signals?), "when to use inheritance?", namespaces, setters...
+* Learning new C# stuff, I will try to use more C# specific features even if not necessary or more complex: interfaces, delegates, events(when to use events instead of Godot's signals?), "when to use inheritance?", namespaces, setters...
 * Try to write more SOLID code, more reusable, more generic (...not high hopes about these...)
 * Try a different (from StickyBlocks) game structure planned in UML: using more state machine pattern, some globals (when makes sense), some specific managers classes (inputs manager, UI manager, main manager,...)     
 * Put more faith in Godot and less in my maths skills (I studied theoretical physics): before going into the rabbit hole of mathematics, try to solve problems using Godot's features! 
@@ -106,3 +106,10 @@ and (maybe?) save the configurations you created. You can also choose to use a b
 * `SettingsPanel`: allow to change default/base color and display version number; post-it theme; connected with `Main`
 * Small refactoring of `RotationArea` collision detection with `LevelBarriers`
 
+
+
+### 03/04/2022
+* Setup draft project [itch.io](https://neurodivergentgames.itch.io))
+* Created app icon for mobile
+* Created some gif/screenshots for itch.io page
+* Fixed some inputs problems

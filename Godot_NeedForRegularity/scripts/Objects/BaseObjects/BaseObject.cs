@@ -150,7 +150,8 @@ namespace GameObjects
 
             if (@event is InputEventMouseButton mouseButtonEvent && IsInstanceValid(@event))
             {
-                if (mouseButtonEvent.IsActionReleased("select") || !mouseButtonEvent.IsPressed())
+                //if (mouseButtonEvent.IsActionReleased("select") || !mouseButtonEvent.IsPressed())
+                if (mouseButtonEvent.ButtonIndex == 1 && !mouseButtonEvent.IsPressed())
                 {
                     _state = Globals.OBJECTSTATE.SELECTED;
                     s_someonePressed = false;
@@ -161,7 +162,7 @@ namespace GameObjects
                     return;
                 }
 
-                if (mouseButtonEvent.IsActionPressed("select") || mouseButtonEvent.IsPressed())
+                if (mouseButtonEvent.ButtonIndex == 1 && mouseButtonEvent.IsPressed())
                 {
                     _state = Globals.OBJECTSTATE.PRESSED;
                     s_someonePressed = true;

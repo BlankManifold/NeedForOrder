@@ -101,24 +101,24 @@ namespace GameUI
             if (_movable)
             {
 
-                if (@event is InputEventMouseButton)
+                if (@event is InputEventMouseButton mouseButtonEvent && mouseButtonEvent.ButtonIndex == 1)
                 {
 
-                    if (@event.IsActionPressed("select") || @event.IsPressed())
+                    if (mouseButtonEvent.IsPressed())
                     {
                         _pressed = true;
-                        @event.Dispose();
+                        mouseButtonEvent.Dispose();
                         return;
                     }
 
-                    if (@event.IsActionReleased("select") || !@event.IsPressed())
+                    if (!mouseButtonEvent.IsPressed())
                     {
                         _pressed = false;
-                        @event.Dispose();
+                        mouseButtonEvent.Dispose();
                         return;
                     }
 
-                    @event.Dispose();
+                    mouseButtonEvent.Dispose();
                     return;
                 }
 

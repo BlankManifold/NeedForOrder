@@ -43,7 +43,7 @@ namespace GameUI
             if (Visible)
             {
 
-                if (@event is InputEventMouseButton mouseButtonEvent && mouseButtonEvent.IsPressed())
+                if (@event is InputEventMouseButton mouseButtonEvent && mouseButtonEvent.ButtonIndex == 1 && mouseButtonEvent.IsPressed())
                 {
                     if (!_unselectionArea.GetRect().HasPoint(mouseButtonEvent.GlobalPosition))
                     {
