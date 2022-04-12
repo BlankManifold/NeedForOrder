@@ -107,9 +107,16 @@ and (maybe?) save the configurations you created. You can also choose to use a b
 * Small refactoring of `RotationArea` collision detection with `LevelBarriers`
 
 
-
 ### 03/04/2022
 * Setup draft project [itch.io](https://neurodivergentgames.itch.io))
+* Created app icon for mobile
+* Created some gif/screenshots for itch.io page
+* Fixed some inputs problems
+
+### 11/04/2022
+* Reduced android export size: compiled godot mono version, created custom android export with all modules disabled (expect webp module), use_lto on, no debug symbols, commented out some ClassDB in register source file, use basic/default R8/ProGuard stuff in build.gradle file -> arm64_v8a + armebi_v7a (release_debug and release) from ~38MB to ~26,1MB export size (mono is 6.1 MB) (still something is unclear to me)
+* Created Google Play Console account
+* Created and setup app in Google Play Console (internal testing phase)
 * Created app icon for mobile
 * Created some gif/screenshots for itch.io page
 * Fixed some inputs problems

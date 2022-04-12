@@ -19,7 +19,6 @@ namespace Main
 
         private Node _objectsContainer;
         private Area2D _mouseArea;
-        private Label _label;
         private GameUI.GameUI _gameUI;
         private Godot.Collections.Array<TextureButton> _UIButtons;
 
@@ -65,7 +64,6 @@ namespace Main
             _gameUI = GetNode<GameUI.GameUI>("GameUILayer/GameUI");
             _settingsPanel = GetNode<GameUI.SettingsPanel>("GameUILayer/SettingsPanel");
             _UIButtons = new Godot.Collections.Array<TextureButton>(GetTree().GetNodesInGroup("UIButton"));
-            _label = GetNode<Label>("Label");
 
             PackedScene levelBarrierScene = (PackedScene)ResourceLoader.Load("res://scenes/BackgroundAndLevel/LevelBarrier.tscn");
             BackgroundAndLevel.LevelBarrier levelBarrier = levelBarrierScene.Instance<BackgroundAndLevel.LevelBarrier>();
@@ -90,12 +88,6 @@ namespace Main
             UpdateState();
             UpdateButtonsState();
             _updateChekingPosition();
-
-
-            if (BaseObject.s_selectedObject != null)
-            {
-                _label.Text = BaseObject.s_selectedObject.InfoString();
-            }
 
             switch (_gamestate)
             {

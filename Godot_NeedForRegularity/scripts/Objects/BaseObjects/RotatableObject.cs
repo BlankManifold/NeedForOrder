@@ -40,8 +40,8 @@ namespace GameObjects
 
         public override void _Ready()
         {
-            _rotationArea = (KinematicBody2D)FindNode("RotationArea");
-            _rotationCollisionArea = (KinematicBody2D)FindNode("RotationCollisionArea");
+            _rotationArea = GetNode<KinematicBody2D>("RotationArea");
+            _rotationCollisionArea = _rotationArea.GetNode<KinematicBody2D>("RotationCollisionArea");
             _rotationAreaShape = _rotationArea.GetNode<CollisionShape2D>("CollisionShape2D");
 
             _rotationArea.Position = _rotationAreaInitialPos;
