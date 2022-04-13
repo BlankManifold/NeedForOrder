@@ -1,11 +1,12 @@
 using Godot;
 using Globals;
+using System;
 
 namespace SaveSystem
 {
     public static class SaveObjectsHandler
     {
-        public static void SaveObjects(Globals.OBJECTTYPE objectType, uint numberOfObjects, Godot.Collections.Array objects, int backgroundNumber)
+        public static void SaveObjects(Globals.OBJECTTYPE objectType, uint numberOfObjects, Godot.Collections.Array objects)
         {
             File objectsDataFile = new File();
             objectsDataFile.Open($"user://{Utilities.ObjectTypeToString(objectType)}{numberOfObjects}.save", File.ModeFlags.Write);
@@ -48,14 +49,10 @@ namespace SaveSystem
             {
                 var nodeData = new Godot.Collections.Dictionary<string, object>((Godot.Collections.Dictionary)JSON.Parse(fileToLoad.GetLine()).Result);
                 
-                //BaseObjectDict.Clear();
-                //BaseObjectDict.AddDataFromJSON(fileToLoad);
-                
                 PackedScene objectScene = ResourceLoader.Load<PackedScene>(Utilities.GetObjectScenePath(objectType));
                 GameObjects.BaseObject objectNode = objectScene.Instance<GameObjects.BaseObject>();
                 
                 objectNode.LoadData(nodeData);
-                //objectNode.LoadData(BaseObjectDict.s_dict);
                 objectsContainer.AddChild(objectNode);
             }
 
@@ -73,7 +70,7 @@ namespace SaveSystem
             fileToLoad.Open(filePath, File.ModeFlags.Read);
 
             var backgroundData = new Godot.Collections.Dictionary<string, object>((Godot.Collections.Dictionary)JSON.Parse(fileToLoad.GetLine()).Result);
-            //backgroundNumber =  (int)backgroundData["BackgroundNumber"];
+            backgroundNumber = Convert.ToInt32(backgroundData["BackgroundNumber"]);
             colorOn = (bool)backgroundData["ColorOn"];
 
             fileToLoad.Close();

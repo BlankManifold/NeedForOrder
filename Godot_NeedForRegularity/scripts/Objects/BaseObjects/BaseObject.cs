@@ -13,7 +13,7 @@ namespace GameObjects
 
         public static bool s_someonePressed = false;
         public static BaseObject s_selectedObject = null;
-        
+
 
 
         public Vector2 RelevantPosition { get; set; }
@@ -25,7 +25,7 @@ namespace GameObjects
         }
 
         protected Color _color;
-        public Color ObjectColor {get { return _color; }}
+        public Color ObjectColor { get { return _color; } }
 
         protected Vector2 _clickedRelativePosition;
         protected Tween _tween;
@@ -78,7 +78,7 @@ namespace GameObjects
         public override void _Ready()
         {
             _tween = GetNode<Tween>("Tween");
-            
+
             UpdateColor();
             RelevantPosition = GlobalPosition;
 
@@ -185,6 +185,11 @@ namespace GameObjects
 
 
 
+        public virtual void StopObject()
+        {
+            _state = Globals.OBJECTSTATE.SELECTED;
+            s_someonePressed = false;
+        }
         public virtual void SelectObject()
         {
             _state = Globals.OBJECTSTATE.PRESSED;

@@ -120,3 +120,4 @@ and (maybe?) save the configurations you created. You can also choose to use a b
 * Created app icon for mobile
 * Created some gif/screenshots for itch.io page
 * Fixed some inputs problems
+* Fixed some bugs:  background save file, line movement, refactored out of bounds for itch.io HTML5-export problem -> `_Notification`

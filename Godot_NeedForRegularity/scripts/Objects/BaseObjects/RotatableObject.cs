@@ -49,7 +49,7 @@ namespace GameObjects
             _rotationAreaShape.Disabled = true;
             _rotationRadius = _rotationAreaInitialPos.Length();
             RelevantRotationAngle = GlobalRotation;
-         
+
             base._Ready();
         }
 
@@ -114,22 +114,27 @@ namespace GameObjects
                     {
                         _state = Globals.OBJECTSTATE.ROTATING;
                     }
-        
+
                     InputRotationPressed();
                     mouseButtonEvent.Dispose();
                     return;
                 }
             }
 
-            if (@event is InputEventMouseMotion && IsInstanceValid(@event))
+            if (@event is InputEventMouseMotion mouseMotion && IsInstanceValid(@event))
             {
                 if (_state == Globals.OBJECTSTATE.ROTATING)
                 {
-                    SetUpRotation(GetGlobalMousePosition());
+                    InputRotationMotion(mouseMotion);
                 }
-                @event.Dispose();
+                mouseMotion.Dispose();
                 return;
             }
+        }
+
+        protected virtual void InputRotationMotion(InputEventMouseMotion mouseMotion)
+        {
+            SetUpRotation(mouseMotion.Position);
         }
         protected virtual void InputRotationReleased()
         {
@@ -142,7 +147,7 @@ namespace GameObjects
             setupFollowMouse(mouseMotion.Position);
             CheckRotationAreaCollision(GlobalPosition);
         }
-        
+
 
 
         public virtual void RotateObject()
@@ -166,7 +171,7 @@ namespace GameObjects
 
             _rotationAreaShape.Disabled = false;
             _rotationArea.ZIndex = 1;
-            
+
             CheckRotationAreaCollision(GlobalPosition);
             _rotationArea.Visible = true;
         }
@@ -191,7 +196,7 @@ namespace GameObjects
             float lerpWeight = 0.4f;
 
             Vector2 referencePos = _rotationArea.GlobalPosition + _clickedRotationAreaRelativePosition - GlobalPosition;
-            RelevantRotationAngle = GlobalRotation + Mathf.LerpAngle(0, referencePos.AngleTo(positionToFollow-GlobalPosition), lerpWeight);
+            RelevantRotationAngle = GlobalRotation + Mathf.LerpAngle(0, referencePos.AngleTo(positionToFollow - GlobalPosition), lerpWeight);
 
             if (_rotationSnappable)
                 SetUpRotationSnappping();
@@ -238,7 +243,7 @@ namespace GameObjects
                 Vector2 dilatetedPos = _rotationArea.GlobalPosition + intialDirection * 20f;
                 Vector2 checkingPos = dilatetedPos;
 
-                for (int i = 1; i <= (int)(2*Mathf.Pi / _checkingRotationAreaAngle); i++)
+                for (int i = 1; i <= (int)(2 * Mathf.Pi / _checkingRotationAreaAngle); i++)
                 {
                     checkingPos = referencePos + (checkingPos - referencePos).Rotated(_checkingRotationAreaAngle);
 

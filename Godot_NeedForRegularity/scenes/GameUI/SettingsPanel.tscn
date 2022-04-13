@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://assets/gameUI/postIt4.png" type="Texture" id=1]
-[ext_resource path="res://assets/gameUI/settingsPanel2.png" type="Texture" id=2]
+[ext_resource path="res://assets/gameUI/settingsPanel3.png" type="Texture" id=2]
 [ext_resource path="res://assets/objects/square2.png" type="Texture" id=3]
 [ext_resource path="res://scripts/GameUI/SettingsPanel.cs" type="Script" id=4]
 [ext_resource path="res://assets/gameUI/selectionLineIcon.png" type="Texture" id=5]

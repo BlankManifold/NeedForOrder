@@ -24,7 +24,7 @@ namespace Main
 
         private TextureRect _backgroundTile;
         private HBoxContainer _backgroundContainer;
-        private Node2D _adsHandler;
+       // private Node2D _adsHandler;
         private GameUI.SettingsPanel _settingsPanel;
 
 
@@ -36,8 +36,20 @@ namespace Main
 
         private Vector2 _currentCheckingPosition;
 
+      
 
 
+        public override void _Notification(int what)
+        {
+            if (what == MainLoop.NotificationWmMouseExit)
+            {
+                if (BaseObject.s_selectedObject != null)
+                {
+                    BaseObject.s_selectedObject.StopObject();
+                    return;
+                }
+            }
+        }
         public override void _Ready()
         {
 
@@ -56,7 +68,7 @@ namespace Main
                 _updateChekingPosition = UpdateChekingPositionMobile;
             }
 
-            _adsHandler = GetNode<Node2D>("AdsHandler");
+            // _adsHandler = GetNode<Node2D>("AdsHandler");
 
             Globals.ScreenInfo.UpdateScreenInfo(GetViewport());
             GetViewport().Connect("size_changed", this, nameof(_on_viewport_size_changed));
@@ -79,12 +91,12 @@ namespace Main
             RandomManager.rng.Randomize();
             _objectsContainer = GetNode<Node>("ObjectsContainer");
 
-
             LoadConfiguration(_objectType, _objectsNumber);
         }
 
         public override void _PhysicsProcess(float delta)
         {
+
             UpdateState();
             UpdateButtonsState();
             _updateChekingPosition();
@@ -112,11 +124,11 @@ namespace Main
         public override void _UnhandledInput(InputEvent @event)
         {
             // UPDATE SELECTION ONLY IF BUTTON CLICKED/PRESSED
-            if (_gamestate == GAMESTATE.PAUSED) //|| (!ScreenInfo.CheckIfValidPosition(GetGlobalMousePosition()) && !_objectPressed))
+            if (_gamestate == GAMESTATE.PAUSED)
             {
                 @event.Dispose();
                 return;
-            }
+            }   
 
             if (@event is InputEventMouseButton mousebutton && mousebutton.ButtonIndex == 1 && mousebutton.IsPressed())
             {
@@ -126,7 +138,6 @@ namespace Main
                     {
                         RotatableObject rotatableObject = (RotatableObject)BaseObject.s_selectedObject;
                         rotatableObject.ClickedOnRotationArea(mousebutton);
-                        
                         _objectPressed = true;
                     }
                     else
@@ -288,7 +299,7 @@ namespace Main
             Godot.Collections.Array objects = _objectsContainer.GetChildren();
             if (objects.Count != 0)
             {
-                SaveSystem.SaveObjectsHandler.SaveObjects(_objectType, _objectsNumber, objects, _backgroundNumber);
+                SaveSystem.SaveObjectsHandler.SaveObjects(_objectType, _objectsNumber, objects);
 
                 foreach (Node child in objects)
                 {
@@ -339,6 +350,7 @@ namespace Main
             //     _gamestate = GAMESTATE.PAUSED;
             //     return;
             // }
+
             if (_gamestate == GAMESTATE.PAUSED)
             {
                 return;
@@ -452,7 +464,7 @@ namespace Main
         public void _on_ScrollGameUI_ObjectTypeChanged(OBJECTTYPE type)
         {
             LoadConfiguration(type, _objectsNumber);
-            
+
             _gamestate = GAMESTATE.IDLE;
             _objectType = type;
             BaseObject.s_selectedObject = null;
@@ -461,7 +473,7 @@ namespace Main
             {
                 _gamestate = GAMESTATE.PAUSED;
             }
-            //_adsHandler.Call("loadBanner");
+            
             GC.Collect();
         }
         public void _on_ScrollGameUI_NumberChanged(uint newNumber)
@@ -499,7 +511,7 @@ namespace Main
         {
             RandomizeObjects();
 
-            _adsHandler.Call("loadBanner");
+            //_adsHandler.Call("loadBanner");
         }
         public void _on_ColorButton_ColorPressed(bool colorOn)
         {
@@ -513,7 +525,7 @@ namespace Main
             if (_settingsPanel.Visible)
             {
                 _gamestate = GAMESTATE.PAUSED;
-                //_adsHandler.Call("loadBanner");
+               
                 return;
             }
 

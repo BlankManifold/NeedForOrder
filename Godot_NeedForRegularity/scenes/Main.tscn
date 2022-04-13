@@ -1,9 +1,8 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://scripts/Main/Main.cs" type="Script" id=1]
 [ext_resource path="res://scenes/GameUI/GameUI.tscn" type="PackedScene" id=2]
 [ext_resource path="res://assets/backgroundTile/cross2.png" type="Texture" id=3]
-[ext_resource path="res://scenes/AdsHandler/AdsHandler.tscn" type="PackedScene" id=4]
 [ext_resource path="res://assets/backgroundTile/verticalLine.png" type="Texture" id=6]
 [ext_resource path="res://scenes/GameUI/SettingsPanel.tscn" type="PackedScene" id=7]
 
@@ -79,6 +78,3 @@ stretch_mode = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="AdsHandler" parent="." instance=ExtResource( 4 )]
-z_index = 3

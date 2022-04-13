@@ -11,7 +11,7 @@ extents = Vector2( 25, 0 )
 collision_layer = 64
 collision_mask = 0
 script = ExtResource( 2 )
-_quickness = 1.05
+_quickness = 63.0
 _rotationAreaInitialPos = Vector2( 70, 70 )
 
 [node name="SelectionAreaShape" parent="." index="0"]

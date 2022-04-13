@@ -23,6 +23,8 @@ namespace GameObjects
         private Line2D _line;
         private CollisionShape2D _selectionAreaShape;
 
+        private Vector2 _oldPosition;
+
 
 
 
@@ -99,7 +101,7 @@ namespace GameObjects
             Vector2 direction = _coefficients.DirectionTo(RelevantPosition);
             float speed = _coefficients.DistanceTo(RelevantPosition) * _quickness;
 
-            _coefficients += direction * speed;
+            _coefficients += direction * speed * delta;
             // _coefficients = _coefficients.LinearInterpolate(RelevantPosition, 1f);
 
             UpdateAll();
@@ -124,6 +126,17 @@ namespace GameObjects
             UpdateShape();
         }
 
+        public override void SelectObject()
+        {
+            _state = Globals.OBJECTSTATE.PRESSED;
+
+            _rotationAreaShape.Disabled = false;
+            _rotationArea.ZIndex = 1;
+
+            UpdateRotationArea(_lineCenterNode.GlobalPosition);
+            CheckRotationAreaCollision(GlobalPosition);
+            _rotationArea.Visible = true;
+        }
 
 
         protected override void setupFollowMouse(Vector2 relativeMotion)
@@ -140,7 +153,6 @@ namespace GameObjects
 
             float oldRotation = RelevantRotationAngle;
             RelevantRotationAngle = (_angleDegrees + deltaAngle) % (2 * Mathf.Pi);
-            
             UpdateRotationArea(_oldLineCenterPos);
 
             KinematicCollision2D rotationAreaCollision = _rotationCollisionArea.MoveAndCollide(Vector2.Zero, testOnly: true);
@@ -159,7 +171,7 @@ namespace GameObjects
                 }
             }
         }
-       
+
 
 
         protected override void InputRotationPressed()
@@ -173,11 +185,17 @@ namespace GameObjects
         }
         protected override void InputMovementMotion(InputEventMouseMotion mouseMotion)
         {
-            setupFollowMouse(mouseMotion.Relative);
+            Vector2 relative = mouseMotion.Position-_oldPosition;
+            _oldPosition = mouseMotion.Position;
+            
+            setupFollowMouse(relative);
             CheckRotationAreaCollision(_lineCenterNode.GlobalPosition);
         }
-        protected override void InputMovementPressed(InputEventMouseButton _) {}
-        protected override void InputMovementReleased() 
+        protected override void InputMovementPressed(InputEventMouseButton mouseButtonEvent) 
+        {
+            _oldPosition = mouseButtonEvent.Position; 
+        }
+        protected override void InputMovementReleased()
         {
             _oldLineCenterPos = _lineCenterNode.GlobalPosition;
         }
@@ -277,7 +295,7 @@ namespace GameObjects
         protected override void UpdateRotationAreaInitialPos(Vector2 referencePos)
         {
             _rotationAreaInitialPos = _rotationArea.GlobalPosition - referencePos;
-            _rotationAreaOffsetAngle += _checkingRotationAreaAngle; 
+            _rotationAreaOffsetAngle += _checkingRotationAreaAngle;
         }
         public override void UpdateToValidPosition()
         {
@@ -286,27 +304,6 @@ namespace GameObjects
         protected override void UpdateColor()
         {
             _line.SelfModulate = _color;
-        }
-
-
-        public override string InfoString()
-        {
-            string text = $"STATE: {_state}";
-            // text += $"\nInRotationArea: {_imOnRotationArea}\nRotatable: {_rotatable}";
-            // text += $"\nSize: {GetViewport().GetVisibleRect().Size}";
-            // text += $"\nRotation: {GlobalRotationDegrees}";
-            // text += $"\nGlobal: {GlobalPosition}";
-            text += $"\nArea Local: {_rotationArea.Position}";
-            text += $"\nArea Global: {_rotationArea.GlobalPosition}";
-            // text += $"\nHasPoint: {GetViewport().GetVisibleRect().HasPoint(_rotationArea.GlobalPosition)}";
-            text += $"\n AngleDegrees: {_angleDegrees}";
-            text += $"\n AngleDegrees: {RelevantRotationAngle}";
-            // text += $"\n _m: {_m}";
-            // text += $"\n RelativePos: {GetLocalMousePosition() - _oldLineCenterPos}";
-            text += $"\n CurrentPivot:  {_oldLineCenterPos}";
-            text += $"\n CurrentCenter:  {_lineCenterNode.GlobalPosition}";
-
-            return text;
         }
 
     }
