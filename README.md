@@ -18,8 +18,9 @@ choose to reorganize randomally placed lines, squares, dots and disks. There is 
  <img align="center"   width= 250px src="stuffForREADME/line1_9x16.png">&nbsp;&nbsp;
  <img align="center"   width= 250px src="stuffForREADME/circle1_9x16.png">
  </p>
-</div>
-<br></br>
+</div>  
+
+
 <div>
 <p align="center">
  <img align="center"   width= 250px src="stuffForREADME/square2_9x16.jpg">&nbsp;&nbsp;&nbsp;
