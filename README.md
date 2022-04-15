@@ -1,6 +1,6 @@
 # NeedForOrder
 <p align="center">
-<img src="screenCaptures/cover_image/cover_002.png" width="410" height="284">
+<img src="stuffForREADME/cover_002.png" width="410" height="284">
 </p>
 
 Second attempt at game development using the [Godot engine](https://godotengine.org/) with C#. Another abstract/clean/simple 2D-game without great expectations. 
@@ -13,9 +13,9 @@ Reorganize some chaotically placed geometric objects at will following your inne
 choose to reorganize randomally placed lines, squares, dots and disks. There is no specific goal: create your pattern/order, lower the entropy. You can also choose to use a background (faded) pattern to inspire and facilitate your need for order.
 
 <p align="center">
- <img align="center" style ="padding: 20px 25px 0 0" width= 295px src="screenCaptures/screenshots_itchio/combined_screen2.png">
- <img align="center" style ="padding: 20px 25px 0 0" width= 295px src="screenCaptures/screenshots_itchio/combined_screen3.png">
- <img align="center"  style ="padding: 20px 25px 0 0; float: none;"  width= 295px src="screenCaptures/screenshots_itchio/combined_screen4.png">
+ <img align="center" style ="padding: 20px 25px 0 0" width= 295px src="stuffForREADME/combined_screen2.png">
+ <img align="center" style ="padding: 20px 25px 0 0" width= 295px src="stuffForREADME/combined_screen3.png">
+ <img align="center"  style ="padding: 20px 25px 0 0; float: none;"  width= 295px src="stuffForREADME/combined_screen4.png">
 </p>
 
 
