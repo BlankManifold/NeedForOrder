@@ -15,7 +15,7 @@ choose to reorganize randomally placed lines, squares, dots and disks. There is 
 <p align="center">
  <img align="center" style ="padding: 2em 3em 0 0" width= 350px src="stuffForREADME/combined_screen2.png">
  <img align="center" style ="padding: 2em 3em 0 0" width= 350px src="stuffForREADME/combined_screen3.png">
- <img align="center"  style ="padding: 2em 3em 0 0; float: none;"  width= 350px src="stuffForREADME/combined_screen4.png">
+ <img align="center"  style ="padding: 3em 3em 0 0; float: none;"  width= 350px src="stuffForREADME/combined_screen4.png">
 </p>
 
 
