@@ -13,9 +13,12 @@ Reorganize some chaotically placed geometric objects at will following your inne
 choose to reorganize randomally placed lines, squares, dots and disks. There is no specific goal: create your pattern/order, lower the entropy. You can also choose to use a background (faded) pattern to inspire and facilitate your need for order.
 
 <p align="center">
- <img align="center" style ="padding: 2em 3em 0 0" width= 350px src="stuffForREADME/combined_screen2.png">
- <img align="center" style ="padding: 2em 3em 0 0" width= 350px src="stuffForREADME/combined_screen3.png">
- <img align="center"  style ="padding: 2em 3em 0 0; float: none;"  width= 350px src="stuffForREADME/combined_screen4.png">
+ <img align="center"  style ="padding: 1em 2em 0 0; float: none;"  width= 200px src="stuffForREADME/square1_9x16.jpg">
+ <img align="center"  style ="padding: 1em 2em 0 0; float: none;"  width= 200px src="stuffForREADME/line1_9x16.png">
+ <img align="center"  style ="padding: 1em 0em 0 0; float: none;"  width= 200px src="stuffForREADME/circle1_9x16.png">
+ <img align="center"  style ="padding: 1em 2em 0 0; float: none;"  width= 200px src="stuffForREADME/square2_9x16.jpg">
+ <img align="center"  style ="padding: 1em 2em 0 0; float: none;"  width= 200px src="stuffForREADME/line2_9x16.png">
+ <img align="center"  style ="padding: 1em 0em 0 0; float: none;"  width= 200px src="stuffForREADME/circle2_9x16.png">
 </p>
 
 
