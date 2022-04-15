@@ -1,13 +1,24 @@
 # NeedForOrder
+<p align="center">
+<img src="screenCaptures/cover_image/cover_002.png" width="410" height="284">
+</p>
 
 Second attempt at game development using the [Godot engine](https://godotengine.org/) with C#. Another abstract/clean/simple 2D-game without great expectations. 
 Another much needed learnirng project, building on the (little) knowledge acquired in the making of [StickyBlocks](https://github.com/NeurodivergentGames/StickyBlocks) (give it a try: [StickyBlocks in itch.io](https://neurodivergentgames.itch.io/stickyblocks)).
 
+
 ## Game objective
 
 Reorganize some chaotically placed geometric objects at will following your inner NeedForOrder. You can 
-choose to reorganize randomally placed lines, squares, dots and disks. There is no specific goal: create your pattern/order, lower the entropy
-and (maybe?) save the configurations you created. You can also choose to use a background (faded) pattern to inspire and facilitate your need for order.
+choose to reorganize randomally placed lines, squares, dots and disks. There is no specific goal: create your pattern/order, lower the entropy. You can also choose to use a background (faded) pattern to inspire and facilitate your need for order.
+
+<p align="center">
+ <img align="center" style ="padding: 20px 25px 0 0" width= 295px src="screenCaptures/screenshots_itchio/combined_screen2.png">
+ <img align="center" style ="padding: 20px 25px 0 0" width= 295px src="screenCaptures/screenshots_itchio/combined_screen3.png">
+ <img align="center"  style ="padding: 20px 25px 0 0; float: none;"  width= 295px src="screenCaptures/screenshots_itchio/combined_screen4.png">
+</p>
+
+
 ## My goals:
 
 * Build and complete another little abstract game (completely on my own)
@@ -117,7 +128,10 @@ and (maybe?) save the configurations you created. You can also choose to use a b
 * Reduced android export size: compiled godot mono version, created custom android export with all modules disabled (expect webp module), use_lto on, no debug symbols, commented out some ClassDB in register source file, use basic/default R8/ProGuard stuff in build.gradle file -> arm64_v8a + armebi_v7a (release_debug and release) from ~38MB to ~26,1MB export size (mono is 6.1 MB) (still something is unclear to me)
 * Created Google Play Console account
 * Created and setup app in Google Play Console (internal testing phase)
-* Created app icon for mobile
 * Created some gif/screenshots for itch.io page
 * Fixed some inputs problems
 * Fixed some bugs:  background save file, line movement, refactored out of bounds for itch.io HTML5-export problem -> `_Notification`
+
+
+## 17/04/2022
+* Created varius icon/cover image: itch.io cover image, google play cover image, google play main image, android app icon
