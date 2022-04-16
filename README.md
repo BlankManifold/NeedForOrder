@@ -3,7 +3,7 @@
 <img src="stuffForREADME/cover_002.png" width="450">
 </p>
 
-The HTML5 version of NeedForOrder is now free to play on [itch.io](https://neurodivergentgames.itch.io/needfororder), or you can download the Android version on [Google Play](https://play.google.com/store/apps/details?id=com.neurodivergentgames.needfororder). 
+The HTML5 version of NeedForOrder is now free to play on [itch.io](https://neurodivergentgames.itch.io/needfororder), or you can download the Android version on the [Google Play Store](https://play.google.com/store/apps/details?id=com.neurodivergentgames.needfororder). 
 
 
 Second attempt at game development using the [Godot engine](https://godotengine.org/) with C#. Another abstract/clean/simple 2D-game without great expectations. 
@@ -149,3 +149,5 @@ choose to reorganize randomally placed lines, squares, dots and disks. There is 
 
 ## 17/04/2022
 * Created varius icon/cover image: itch.io cover image, google play cover image, google play main image, android app icon
+* Fixed some small ads id unit problem
+* Publish on itch.io (HTML5 version) and Google Play Store (Android version)
